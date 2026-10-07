@@ -1,51 +1,59 @@
 {% extends "base.html" %}
-{% from "_macros.html" import quote_box, crumbs, post_card %}
+{% from "_macros.html" import quote_band, post_card, post_feature, hero %}
 {% block main %}
-<div class="page-head">
-  <div class="wrap section">
-    {{ crumbs(page.crumbs) }}
-    <h1>Tips &amp; Resources</h1>
-    <p class="lede">Practical car insurance advice for Chicago drivers: claims, coverage, SR-22s, safety and keeping your car on the road.</p>
-  </div>
-</div>
-<div class="wrap section blog-layout">
-  <div>
-    <div class="blog-tools">
-      <form class="search" role="search" action="{{ links.search }}" method="get">
-        <label class="visually-hidden" for="blog-search">Search articles</label>
-        <input id="blog-search" name="s" type="search" placeholder="Search articles">
-        <button class="btn btn-primary" type="submit">{{ icons['magnifying-glass'] | safe }}Search</button>
-      </form>
-      <nav aria-label="Topics"><ul class="chips">{% for c in chips %}<li><a data-chip href="{{ c.link }}">{{ c.name }}</a></li>{% endfor %}</ul></nav>
-    </div>
-    <ul class="post-grid">
-      {% if featured %}<li class="post-featured-item">{{ post_card(featured, True) }}</li>{% endif %}
-      {% for post in posts %}
-      <li{% if loop.last and posts|length is odd %} class="post-featured-item"{% endif %}>{{ post_card(post) }}</li>
-      {% if loop.index == (2 if featured else 3) %}<li class="quote-inline">{{ quote_box('inline', heading='h2') }}</li>{% endif %}
-      {% endfor %}
+{{ sprite | safe }}
+{% call hero(page.crumbs, "Tips & Resources", "Straight answers on coverage, claims, SR-22s and driving in Chicago.") %}
+  <form class="search" role="search" action="{{ links.search }}" method="get" data-blog-search>
+    <label class="visually-hidden" for="blog-q">Search {{ post_count }} guides</label>
+    {{ icons['magnifying-glass'] | safe }}
+    <input id="blog-q" name="s" type="search" placeholder="Search {{ post_count }} guides" autocomplete="off" enterkeyhint="search" aria-controls="search-results">
+    <button class="search-clear" type="button" data-clear hidden aria-label="Clear search">{{ icons.x | safe }}</button>
+    <kbd aria-hidden="true">/</kbd>
+  </form>
+  <nav class="chips-nav" aria-label="Topics"><ul class="chips"><li><a class="chip is-on" data-topic="" href="/customer-service/blog/">All topics</a></li>{% for t in topics %}<li><a class="chip" data-topic="{{ t.name }}" href="{{ t.link }}">{{ t.name }}</a></li>{% endfor %}</ul></nav>
+{% endcall %}
+<div class="wrap blog-main">
+  <p class="visually-hidden" aria-live="polite" id="search-status"></p>
+  <section id="search-results" class="search-results" aria-labelledby="results-h" tabindex="-1" hidden></section>
+  <div id="default-view">
+    {% if featured %}<section class="featured" aria-label="Latest guide">{{ post_feature(featured) }}</section>{% endif %}
+    <h2 class="sec-title" id="latest">{{ "Latest guides" if page_no == 1 else "Guides, page " ~ page_no }}</h2>
+    <ul class="grid">{% for p in first %}<li>{{ post_card(p) }}</li>{% endfor %}</ul>
+    {{ quote_band('blog') }}
+    <ul class="grid">
+      {% for p in rest %}<li>{{ post_card(p) }}</li>{% endfor %}
+      {% if page_no == 1 %}<li class="ask-tile"><div class="card post ask">
+        <div class="cover tone-cta" aria-hidden="true"><svg class="cover-icon"><use href="#t-chat-circle-text"></use></svg><svg class="cover-mark"><use href="#t-chat-circle-text"></use></svg></div>
+        <div class="post-body">
+          <p class="meta"><span class="topic">Still have a question?</span></p>
+          <h3 class="post-title">Can't find your answer?</h3>
+          <p class="excerpt">Search all {{ post_count }} guides, or call our team. We're happy to help.</p>
+          <div class="ask-actions">
+            <a class="btn btn-cta" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call {{ main_phone }}</a>
+            <a class="ask-search" href="#blog-q">Search the guides</a>
+          </div>
+        </div>
+      </div></li>{% endif %}
     </ul>
     <nav aria-label="Article pages">
       <ul class="pagination">
+        {% if page_no > 1 %}<li><a class="pg-step" href="/customer-service/blog/{% if page_no > 2 %}page/{{ page_no - 1 }}/{% endif %}">{{ icons['arrow-left'] | safe }}Previous</a></li>{% endif %}
         {% for n in range(1, page_count + 1) %}
         <li>{% if n == page_no %}<span aria-current="page">{{ n }}</span>{% else %}<a href="/customer-service/blog/{% if n > 1 %}page/{{ n }}/{% endif %}">{{ n }}</a>{% endif %}</li>
         {% endfor %}
-        {% if page_no < page_count %}<li><a href="/customer-service/blog/page/{{ page_no + 1 }}/">Next {{ icons['caret-right'] | safe }}</a></li>
-        {% else %}<li><a href="{{ older_url }}">Older articles {{ icons['caret-right'] | safe }}</a></li>{% endif %}
+        {% if page_no < page_count %}<li><a class="pg-step" href="/customer-service/blog/page/{{ page_no + 1 }}/">Next{{ icons['arrow-right'] | safe }}</a></li>
+        {% else %}<li><a class="pg-step" href="{{ older_url }}">Older articles{{ icons['arrow-right'] | safe }}</a></li>{% endif %}
       </ul>
     </nav>
   </div>
-  <aside class="blog-side" aria-label="Get help">
-    {{ quote_box('side', heading='h2') }}
-    <section class="card" aria-labelledby="help-h">
-      <h2 id="help-h">Need help?</h2>
-      <ul class="help-list">
-        <li><a href="{{ links.payment_options }}">{{ icons['credit-card'] | safe }}Payment options</a></li>
-        <li><a href="{{ links.roadside }}">{{ icons.truck | safe }}Roadside assistance</a></li>
-        <li><a href="{{ links.claim }}">{{ icons['file-text'] | safe }}Report an auto insurance claim</a></li>
-        <li><a href="{{ links.faq }}">{{ icons.question | safe }}Auto insurance FAQs</a></li>
-      </ul>
-    </section>
-  </aside>
+  <section class="help-strip" aria-labelledby="help-h">
+    <h2 id="help-h">Need help with your policy?</h2>
+    <ul>
+      <li><a href="{{ links.payment_options }}">{{ icons['credit-card'] | safe }}Payment options</a></li>
+      <li><a href="{{ links.roadside }}">{{ icons.truck | safe }}Roadside assistance</a></li>
+      <li><a href="{{ links.claim }}">{{ icons['file-text'] | safe }}Report a claim</a></li>
+      <li><a href="{{ links.faq }}">{{ icons.question | safe }}Auto insurance FAQs</a></li>
+    </ul>
+  </section>
 </div>
 {% endblock %}

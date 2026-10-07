@@ -8,3 +8,6 @@ initQuoteForms();
 if (document.querySelector('[data-map]')) {
   import('./map.js').then((m) => m.initMap()).catch(() => {});
 }
+if (document.querySelector('[data-blog-search]')) {
+  import('./blog.js').then((m) => m.initBlog()).catch(() => {});
+}

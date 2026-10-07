@@ -35,7 +35,7 @@ export function initMap() {
       await loadScript('/assets/vendor/leaflet/leaflet.js');
       const L = window.L;
       const points = JSON.parse(panel.dataset.points);
-      const map = L.map(canvas, { scrollWheelZoom: false });
+      const map = L.map(canvas, { scrollWheelZoom: false, dragging: !L.Browser.mobile, tap: false });
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
