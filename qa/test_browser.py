@@ -186,7 +186,9 @@ def test_keyboard_walk(pw, base, path):
         page.keyboard.press("Tab")
         info = page.evaluate("""() => { const el = document.activeElement; const has = (n) => { const cs = getComputedStyle(n); return cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0; };
             const card = el.closest('.post');  // blog cards draw the ring on the whole card via :focus-within
-            return { footer: !!el.closest('.site-footer'), ring: has(el) || (!!card && has(card)),
+            const box = el.closest('.search');  // the search field draws a 3px yellow ring on its wrapper
+            const boxRing = !!box && getComputedStyle(box).boxShadow.includes('0px 0px 0px 3px');
+            return { footer: !!el.closest('.site-footer'), ring: has(el) || (!!card && has(card)) || boxRing,
                      label: (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().slice(0, 40) }; }""")
         if not info["ring"]:
             no_ring.append(info["label"])
