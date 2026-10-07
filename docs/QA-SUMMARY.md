@@ -17,3 +17,5 @@ Browser QA (qa/test_browser.py, 26 checks, all passing):
 - Status pills use Chicago time from a Manila clock; JS-off page keeps hours, phone links, menu and a working quote form; ZIP validation; map loads 4 pins and degrades to the Google Maps link if Leaflet/tiles are blocked.
 
 Links (qa/check_links.py): 88 checked, all 2xx/3xx except bbb.org (403 to scripts: Cloudflare "Just a moment" bot check; same profile URL their live BBB seal uses, opens normally for a person).
+
+Structured data (validator.schema.org, deployed pages): locations 5 objects, contact 2, blog 3; 0 errors, 0 warnings.
