@@ -1,0 +1,17 @@
+{
+  "affordability": {"icon": "piggy-bank", "tone": "pale"},
+  "claims": {"icon": "file-text", "tone": "blue"},
+  "coverages": {"icon": "umbrella", "tone": "pale"},
+  "driving-local-chicago-guide": {"icon": "map-trifold", "tone": "navy"},
+  "education": {"icon": "graduation-cap", "tone": "blue"},
+  "international": {"icon": "globe-hemisphere-west", "tone": "pale"},
+  "legal": {"icon": "scales", "tone": "navy"},
+  "license-registration": {"icon": "identification-card", "tone": "blue"},
+  "maintenance": {"icon": "wrench", "tone": "blue"},
+  "rentals": {"icon": "key", "tone": "blue"},
+  "safety": {"icon": "shield-check", "tone": "navy"},
+  "sr-22": {"icon": "seal-check", "tone": "navy"},
+  "tips": {"icon": "lightbulb", "tone": "pale"},
+  "vehicle-type-guides": {"icon": "car-profile", "tone": "pale"},
+  "uncategorized": {"icon": "newspaper", "tone": "pale"}
+}

@@ -79,3 +79,24 @@ def test_assets_present():
         assert (ROOT / "static" / "icons" / f"{icon}.svg").exists(), icon
     for f in ["leaflet.js", "leaflet.css", "images/marker-icon.png", "images/marker-icon-2x.png", "images/marker-shadow.png"]:
         assert (ROOT / "static" / "vendor" / "leaflet" / f).exists(), f
+
+
+def test_full_post_index():
+    idx = load("posts_index.json")
+    assert len(idx) >= 590  # 594 at fetch time (2026-10-07)
+    assert [p["date"] for p in idx] == sorted((p["date"] for p in idx), reverse=True)
+    for p in idx:
+        assert p["title"] and p["link"].startswith("https://www.insureonthespot.com/") and p["words"] > 0
+    assert {12719, 12699} <= {p["id"] for p in idx}
+
+
+def test_topics_have_icon_and_tone():
+    topics = load("topics.json")
+    cats = load("categories.json")
+    for c in cats:
+        if c["slug"] == "uncategorized":
+            continue
+        t = topics[c["slug"]]
+        assert t["tone"] in {"navy", "blue", "pale"}, c["slug"]
+        assert (ROOT / "static" / "icons" / f"{t['icon']}.svg").exists(), t["icon"]
+    assert (ROOT / "static" / "icons" / "newspaper.svg").exists()
