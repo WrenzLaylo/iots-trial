@@ -78,3 +78,13 @@ test('highlight wraps matches, keeps accents and escapes HTML', () => {
   assert.equal(highlight('<b>Fish & Chips</b>', 'fish'), '&lt;b&gt;<mark>Fish</mark> &amp; Chips&lt;/b&gt;');
   assert.equal(highlight('Plain title', ''), 'Plain title');
 });
+
+test("topic filter matches any of a post's topics, cover uses the first", () => {
+  const multi = buildIndex({
+    topics: [{ name: 'Safety', slug: 'safety' }, { name: 'Coverages', slug: 'coverages' }],
+    posts: [['Winter driving and your policy', 'https://x/9', '2026-01-01', [0, 1], 5, 'Snow tips.', '']],
+  });
+  assert.equal(multi[0].topic, 'Safety');
+  assert.equal(searchPosts(multi, { topic: 'Coverages' }).length, 1);
+  assert.equal(searchPosts(multi, { topic: 'Safety' }).length, 1);
+});

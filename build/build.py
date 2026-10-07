@@ -148,13 +148,14 @@ def load_posts():
     by_id = {t["id"]: i for i, t in enumerate(topics)}
     out = []
     for p in _json("posts_index.json"):
-        ti = next((by_id[c] for c in p["cats"] if c in by_id), -1)
+        tis = [by_id[c] for c in p["cats"] if c in by_id]
+        ti = tis[0] if tis else -1
         t = topics[ti] if ti >= 0 else {"name": "", "slug": "", "icon": "newspaper", "tone": "pale"}
         title = html.unescape(p["title"])
         d = _date.fromisoformat(p["date"])
         out.append({"id": p["id"], "title": title, "link": p["link"], "date": p["date"],
                     "date_label": f"{d:%b} {d.day}, {d.year}", "topic": t["name"], "topic_slug": t["slug"],
-                    "icon": t["icon"], "tone": t["tone"], "ti": ti, "mins": reading_minutes(p["words"]),
+                    "icon": t["icon"], "tone": t["tone"], "ti": ti, "tis": tis, "mins": reading_minutes(p["words"]),
                     "excerpt": clean_excerpt(p["excerpt_html"], 150), "short": clean_excerpt(p["excerpt_html"], 110),
                     "lang": "es" if (p["id"] in SPANISH_POST_IDS or is_spanish(title)) else None})
     return topics, out
@@ -163,7 +164,7 @@ def load_posts():
 def search_index(topics, posts) -> dict:
     return {"base": PROD, "count": len(posts),
             "topics": [{k: t[k] for k in ("name", "slug", "icon", "tone", "link")} for t in topics],
-            "posts": [[p["title"], p["link"][len(PROD):], p["date"], p["ti"], p["mins"], p["short"], p["lang"] or ""] for p in posts]}
+            "posts": [[p["title"], p["link"][len(PROD):], p["date"], p["tis"], p["mins"], p["short"], p["lang"] or ""] for p in posts]}
 
 
 def icon_sprite(names) -> str:

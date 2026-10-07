@@ -13,13 +13,14 @@ export function tokens(q) {
 
 export function buildIndex(raw) {
   return raw.posts.map(([title, link, date, ti, mins, excerpt, lang]) => {
-    const topic = ti >= 0 && raw.topics[ti] ? raw.topics[ti] : null;
+    const all = (Array.isArray(ti) ? ti : [ti]).map((i) => raw.topics[i]).filter(Boolean);
+    const topic = all[0] || null; // first topic drives the cover art
     return {
       title, link, date, mins, excerpt, lang: lang || '',
-      topic: topic ? topic.name : '', topicSlug: topic ? topic.slug : '',
+      topic: topic ? topic.name : '', topicSlug: topic ? topic.slug : '', topics: all.map((t) => t.name),
       icon: topic ? topic.icon : 'newspaper', tone: topic ? topic.tone : 'pale',
       titleNorm: normalize(title),
-      hay: normalize(`${title} ${topic ? topic.name : ''} ${excerpt}`),
+      hay: normalize(`${title} ${all.map((t) => t.name).join(' ')} ${excerpt}`),
     };
   });
 }
@@ -28,7 +29,7 @@ export function searchPosts(items, { q = '', topic = '' } = {}) {
   const toks = tokens(q);
   const hits = [];
   for (const it of items) {
-    if (topic && it.topic !== topic) continue;
+    if (topic && !it.topics.includes(topic)) continue;
     if (!toks.every((t) => it.hay.includes(t))) continue;
     hits.push({ it, score: toks.filter((t) => it.titleNorm.includes(t)).length });
   }

@@ -208,3 +208,10 @@ def test_spanish_posts_are_marked_spanish(site, rel, title):
     html = (site / rel.strip("/") / "index.html").read_text(encoding="utf-8")
     card = re.search(r'<article class="card post[^>]*>(?:(?!</article>).)*' + re.escape(title), html, flags=re.S)
     assert card and re.search(r'class="post-title" lang="es"', card.group(0)), f"{title} title is not lang=es"
+
+
+def test_css_has_no_font_shorthand_with_inherit():
+    # `font: 700 15px inherit` is invalid CSS and silently drops the whole declaration (bit us twice)
+    css = (ROOT / "static" / "css" / "site.css").read_text(encoding="utf-8")
+    bad = [m for m in re.findall(r"font:[^;}]*", css) if "inherit" in m and m.replace(" ", "") != "font:inherit"]
+    assert not bad, bad

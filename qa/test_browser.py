@@ -223,3 +223,140 @@ def test_map_does_not_trap_scrolling_on_phones(pw, base):
     classes = page.locator(".map-canvas").get_attribute("class")
     assert "leaflet-touch-drag" not in classes, classes
     browser.close()
+
+
+# ---------- v2 instant search ----------
+BLOG = "/customer-service/blog/"
+
+
+def _blog(pw, base, path=BLOG, width=1440):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": width, "height": 900})
+    errors = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    page.goto(base + path, wait_until="load")
+    page.wait_for_selector("[data-blog-search][data-ready]", state="attached")
+    return browser, page, errors
+
+
+def test_instant_search_results(pw, base):
+    browser, page, errors = _blog(pw, base)
+    page.locator("#blog-q").press_sequentially("sr22", delay=40)
+    page.wait_for_function("(document.getElementById('results-h') || {}).textContent?.includes('sr22')")
+    assert "sr22" in page.inner_text("#results-h") and "guides" in page.inner_text("#results-h")
+    cards = page.locator("#search-results article.post")
+    assert 1 <= cards.count() <= 12
+    assert "SR-22" in " ".join(page.locator("#search-results .post-title mark").all_inner_texts())
+    assert "q=sr22" in page.url and page.locator("#default-view").is_hidden()
+    assert not errors
+    browser.close()
+
+
+def test_accent_insensitive_search(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.fill("#blog-q", "que pasa si te detienen")
+    page.wait_for_selector("#search-results article.post")
+    assert page.locator("#search-results .post-title").first.inner_text().startswith("Qué")
+    browser.close()
+
+
+def test_empty_state_is_designed(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.fill("#blog-q", "zzqxv")
+    page.wait_for_selector(".empty")
+    assert page.inner_text("#results-h").startswith("No guides match")
+    body = page.inner_text("#search-results")
+    assert "0 guides" not in body and "0 results" not in body
+    assert page.locator('.empty a[href="https://www.insureonthespot.com/?s=zzqxv"]').count() == 1
+    assert page.locator('.empty a[href^="tel:"]').count() == 1
+    assert page.locator(".empty .pop button").count() >= 4
+    browser.close()
+
+
+def test_did_you_mean(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.fill("#blog-q", "insurence")
+    page.wait_for_selector(".empty .suggestion")
+    page.locator(".empty .suggestion").first.click()
+    page.wait_for_selector("#search-results article.post")
+    assert page.input_value("#blog-q") == "insurance"
+    browser.close()
+
+
+def test_matches_hidden_by_topic_are_offered(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.locator('.chip[data-topic="Rentals"]').click()
+    page.wait_for_selector("#results-h")
+    page.fill("#blog-q", "dui")
+    page.wait_for_selector(".empty .suggestion")
+    btn = page.locator(".empty .suggestion", has_text="all topics")
+    assert btn.count() == 1
+    btn.click()
+    page.wait_for_selector("#search-results article.post")
+    assert page.locator('.chip.is-on[data-topic=""]').count() == 1
+    browser.close()
+
+
+def test_pagination_and_back(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.locator('.chip[data-topic="Coverages"]').click()
+    page.wait_for_selector(".results-range")
+    assert page.inner_text(".results-range").startswith("Showing 1 to 12 of")
+    page.locator('#search-results .pagination button[data-page="2"]').click()
+    page.wait_for_function("document.querySelector('.results-range').textContent.startsWith('Showing 13 to 24')")
+    assert "page=2" in page.url and "topic=Coverages" in page.url
+    assert page.evaluate("document.activeElement.id") == "results-h"
+    page.go_back()
+    page.wait_for_function("document.querySelector('.results-range').textContent.startsWith('Showing 1 to 12')")
+    page.go_back()
+    page.wait_for_function("!document.getElementById('default-view').hidden")
+    browser.close()
+
+
+def test_reload_restores_query(pw, base):
+    browser, page, _ = _blog(pw, base, BLOG + "?q=sr22")
+    page.wait_for_selector("#search-results article.post")
+    assert page.input_value("#blog-q") == "sr22"
+    browser.close()
+
+
+def test_index_failure_falls_back_to_wordpress_search(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page()
+    page.route("**/assets/data/posts-index.json", lambda r: r.abort())
+    seen = []
+    page.route("https://www.insureonthespot.com/**", lambda r: (seen.append(r.request.url), r.abort()))
+    page.goto(base + BLOG, wait_until="load")
+    page.wait_for_selector("[data-blog-search][data-ready]", state="attached")
+    page.fill("#blog-q", "sr22")
+    page.wait_for_selector(".notice")
+    page.press("#blog-q", "Enter")
+    page.wait_for_timeout(800)
+    assert any(u.startswith("https://www.insureonthespot.com/?s=sr22") for u in seen), seen
+    browser.close()
+
+
+@pytest.mark.parametrize("query", ["sr22", "zzqxv"])
+def test_axe_on_search_states(pw, base, query):
+    browser, page, _ = _blog(pw, base, width=390)
+    page.fill("#blog-q", query)
+    page.wait_for_selector("#results-h")
+    overflow = page.evaluate("document.documentElement.scrollWidth - window.innerWidth")
+    assert overflow <= 0, overflow
+    page.add_script_tag(content=AXE)
+    res = page.evaluate("axe.run(document, {resultTypes: ['violations']})")
+    assert not res["violations"], [(v["id"], len(v["nodes"])) for v in res["violations"]]
+    browser.close()
+
+
+def test_typing_before_search_script_loads(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page()
+    def slow(route):
+        time.sleep(1.0)
+        route.continue_()
+    page.route("**/assets/js/blog.js*", slow)
+    page.goto(base + BLOG, wait_until="domcontentloaded")
+    page.fill("#blog-q", "sr22")  # typed before blog.js has loaded
+    page.wait_for_function("(document.getElementById('results-h') || {}).textContent?.includes('sr22')", timeout=10000)
+    browser.close()
