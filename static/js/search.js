@@ -1,5 +1,5 @@
 // Pure search helpers for the blog's instant search (no DOM). Unit-tested in tests/js/search.test.mjs.
-const DIACRITICS = /[̀-ͯ]/g;
+const DIACRITICS = /[\u0300-\u036f]/g;
 
 export function normalize(s) {
   return String(s ?? '').normalize('NFD').replace(DIACRITICS, '').toLowerCase()
