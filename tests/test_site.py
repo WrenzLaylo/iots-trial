@@ -215,3 +215,16 @@ def test_css_has_no_font_shorthand_with_inherit():
     css = (ROOT / "static" / "css" / "site.css").read_text(encoding="utf-8")
     bad = [m for m in re.findall(r"font:[^;}]*", css) if "inherit" in m and m.replace(" ", "") != "font:inherit"]
     assert not bad, bad
+
+
+@pytest.mark.parametrize("rel", ["locations", "contact"])
+def test_hero_band_on_locations_and_contact(site, rel):
+    html = (site / rel / "index.html").read_text(encoding="utf-8")
+    hero = html.split('<section class="hero has-photo">', 1)
+    assert len(hero) == 2, f"{rel}: no hero band with photo"
+    block = hero[1].split("</section>", 1)[0]
+    assert "<h1>" in block and '<nav class="crumbs"' in block
+    if rel == "contact":
+        assert 'class="big-phone" href="tel:+17732025060"' in block
+    else:
+        assert "4 offices" in block

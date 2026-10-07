@@ -162,6 +162,14 @@ address{font-style:normal}
 .hero-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 @media (max-width:767px){.hero-grid{padding-top:22px;padding-bottom:24px}.hero.has-photo .hero-grid{grid-template-columns:1fr}.hero-photo{display:none}}
 
+.hero .facts{color:#fff}.hero .facts .icon{color:var(--cta)}
+.hero .big-phone{color:var(--cta);font-size:clamp(30px,4.4vw,44px)}.hero .big-phone .icon{color:var(--cta)}
+.hero .big-phone:hover{color:#fff}
+.section-title,.contact-grid h2{font-size:clamp(24px,2.6vw,30px);letter-spacing:-.015em}
+.tasks a{box-shadow:var(--shadow-1);border:0;transition:transform .2s ease,box-shadow .2s ease}.tasks a:hover{transform:translateY(-2px);box-shadow:var(--shadow-2)}
+.branch,.dept{transition:box-shadow .2s ease}
+.map-canvas{border:0;box-shadow:var(--shadow-1);border-radius:16px}
+.promo{border-radius:16px}
 /* search field + topic chips (in the hero) */
 .search{display:flex;align-items:center;gap:12px;background:#fff;border-radius:16px;padding:0 10px 0 18px;height:60px;max-width:720px;box-shadow:0 18px 40px -18px rgba(0,0,0,.55);color:var(--muted)}
 .search>.icon{width:22px;height:22px;color:var(--navy)}

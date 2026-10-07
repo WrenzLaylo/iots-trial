@@ -1,20 +1,10 @@
 {% extends "base.html" %}
-{% from "_macros.html" import branch_card, quote_box, crumbs, status, hours_list %}
+{% from "_macros.html" import branch_card, quote_box, status, hours_list, hero %}
 {% block main %}
-<div class="page-head">
-  <div class="wrap page-head-grid">
-    <div class="page-head-text">
-      {{ crumbs(page.crumbs) }}
-      <p class="eyebrow">Chicago's #1 Auto Insurance Agency</p>
-      <h1>Contact Us</h1>
-      <p class="lede">Call us, stop by one of our 4 Chicagoland offices, or handle it online.</p>
-      <a class="big-phone" href="tel:{{ main_tel }}">{{ icons.phone | safe }}{{ main_phone }}</a>
-    </div>
-    <div class="page-head-photo">
-      <img src="/assets/img/contact-photo.webp" alt="Insure On The Spot agent in a branded shirt holding a toy car" width="{{ images['contact-photo.webp'][0] }}" height="{{ images['contact-photo.webp'][1] }}" fetchpriority="high" style="object-position:50% 25%">
-    </div>
-  </div>
-</div>
+{% call hero(page.crumbs, "Contact Us", "Call us, stop by one of our 4 Chicagoland offices, or handle it online.", eyebrow="Chicago's #1 Auto Insurance Agency",
+            photo={"src": "/assets/img/contact-photo.webp", "alt": "Insure On The Spot team member in a branded shirt holding a toy car", "w": images["contact-photo.webp"][0], "h": images["contact-photo.webp"][1], "pos": "50% 25%"}) %}
+  <a class="big-phone" href="tel:{{ main_tel }}">{{ icons.phone | safe }}{{ main_phone }}</a>
+{% endcall %}
 <div class="wrap section contact-grid">
   <div>
     <section aria-labelledby="hours-h">
