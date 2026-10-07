@@ -1,0 +1,7 @@
+{
+  "name": "iots-trial",
+  "private": true,
+  "type": "module",
+  "scripts": { "test:js": "node --test tests/js/" },
+  "devDependencies": { "axe-core": "4.10.2" }
+}

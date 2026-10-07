@@ -1,0 +1,34 @@
+{
+  "timezone": "America/Chicago",
+  "holiday_note": "Holiday hours may vary, call to confirm.",
+  "main_phone": "773-202-5060",
+  "main_tel": "+17732025060",
+  "branches": [
+    {"id": "hq", "name": "Corporate Headquarters", "note": "Next to the DMV (Secretary of State)",
+     "street": "5485 N Elston Ave", "city": "Chicago", "state": "IL", "zip": "60630",
+     "phone": "(773) 202-5060", "tel": "+17732025060", "lat": 41.98146, "lng": -87.75957,
+     "url": "https://www.insureonthespot.com/locations/corporate-headquarters/",
+     "hours": {"mon": ["08:00", "20:00"], "tue": ["08:00", "20:00"], "wed": ["08:00", "20:00"], "thu": ["08:00", "20:00"], "fri": ["08:00", "20:00"], "sat": ["08:00", "17:30"]}},
+    {"id": "chicago-south", "name": "Chicago, IL South", "note": "",
+     "street": "8537 S Cicero Ave", "city": "Chicago", "state": "IL", "zip": "60652",
+     "phone": "(773) 202-0651", "tel": "+17732020651", "lat": 41.7378, "lng": -87.74085,
+     "url": "https://www.insureonthespot.com/locations/chicago-il-south/",
+     "hours": {"mon": ["09:30", "18:00"], "tue": ["09:30", "18:00"], "wed": ["09:30", "18:00"], "thu": ["09:30", "18:00"], "fri": ["09:30", "18:00"], "sat": ["09:00", "15:00"]}},
+    {"id": "berwyn", "name": "Berwyn, IL", "note": "",
+     "street": "7015 W Roosevelt Rd", "city": "Berwyn", "state": "IL", "zip": "60402",
+     "phone": "(708) 857-7661", "tel": "+17088577661", "lat": 41.86474, "lng": -87.79973,
+     "url": "https://www.insureonthespot.com/locations/berwyn-il/",
+     "hours": {"mon": ["09:30", "18:00"], "tue": ["09:30", "18:00"], "wed": ["09:30", "18:00"], "thu": ["09:30", "18:00"], "fri": ["09:30", "18:00"], "sat": ["09:00", "15:00"]}},
+    {"id": "melrose-park", "name": "Melrose Park, IL", "note": "Next to the DMV (Secretary of State)",
+     "street": "1907 N Mannheim Rd", "city": "Melrose Park", "state": "IL", "zip": "60160",
+     "phone": "(708) 547-1800", "tel": "+17085471800", "lat": 41.90797, "lng": -87.88367,
+     "url": "https://www.insureonthespot.com/locations/melrose-park-il/",
+     "hours": {"mon": ["08:00", "18:00"], "tue": ["08:00", "18:00"], "wed": ["08:00", "18:00"], "thu": ["08:00", "18:00"], "fri": ["08:00", "18:00"], "sat": ["08:00", "14:00"]}}
+  ],
+  "departments": [
+    {"id": "customer-service", "name": "Customer Service",
+     "hours": {"mon": ["08:00", "20:00"], "tue": ["08:00", "20:00"], "wed": ["08:00", "20:00"], "thu": ["08:00", "20:00"], "fri": ["08:00", "20:00"], "sat": ["08:00", "17:00"]}},
+    {"id": "sales", "name": "Sales",
+     "hours": {"mon": ["08:00", "20:30"], "tue": ["08:00", "20:30"], "wed": ["08:00", "20:30"], "thu": ["08:00", "20:30"], "fri": ["08:00", "20:30"], "sat": ["08:00", "17:30"]}}
+  ]
+}
