@@ -236,10 +236,10 @@ address{font-style:normal}
 .cta-band h2{color:#fff;margin:0 0 6px;font-size:clamp(22px,2.4vw,28px);letter-spacing:-.02em}
 .cta-band p{margin:0;color:#c9d8e2}
 .cta-band label{display:block;font-weight:700;margin-bottom:6px}
-.ask{height:100%;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:26px;background:linear-gradient(160deg,#fff8e1,#fff);border:1px solid var(--promo-line)}
-.ask h3{margin:0;font-size:21px}.ask p{margin:0;color:var(--ink-2)}
-.ask .btn{align-self:flex-start}
-.ask-search{font-weight:700}
+.tone-cta{background:linear-gradient(135deg,#ffcd3c,#ffe07a);color:var(--navy-dark)}.tone-cta .cover-icon{color:var(--navy-dark)}
+.ask .excerpt{-webkit-line-clamp:3}
+.ask-actions{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding-top:4px}
+.ask-search{font-weight:700;min-height:44px;display:inline-flex;align-items:center}
 .help-strip{margin:44px 0 10px}
 .help-strip h2{font-size:22px;margin-bottom:14px}
 .help-strip ul{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}

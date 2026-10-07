@@ -114,6 +114,9 @@ def test_blog_hero_cards_and_reading_time(site):
         assert 'class="cover tone-' in card and '<use href="#t-' in card
         assert re.search(r"\d+ min read", card)
     assert 'class="ask-tile"' in html  # fills the 12th grid cell on page 1
+    tile = html.split('class="ask-tile"', 1)[1].split("</li>", 1)[0]
+    assert 'class="cover tone-cta"' in tile and 'class="post-body"' in tile  # same anatomy as the post cards
+    assert '<use href="#t-chat-circle-text">' in tile and 'id="t-chat-circle-text"' in html
 
 
 def test_search_index_file(site):

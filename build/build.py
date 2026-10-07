@@ -178,7 +178,7 @@ def icon_sprite(names) -> str:
 
 def blog_pages(ctx):
     topics, posts = load_posts()
-    sprite = icon_sprite([t["icon"] for t in topics] + ["newspaper"])
+    sprite = icon_sprite([t["icon"] for t in topics] + ["newspaper", "chat-circle-text"])
     out = []
     for n, chunk in enumerate(paginate(posts, PER_PAGE, BLOG_PAGES), start=1):
         rel = "customer-service/blog" + ("" if n == 1 else f"/page/{n}")

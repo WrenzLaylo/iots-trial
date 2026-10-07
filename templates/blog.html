@@ -22,11 +22,17 @@
     {{ quote_band('blog') }}
     <ul class="grid">
       {% for p in rest %}<li>{{ post_card(p) }}</li>{% endfor %}
-      {% if page_no == 1 %}<li class="ask-tile"><div class="card ask">
-        <h3>Can't find your answer?</h3>
-        <p>Search all {{ post_count }} guides, or ask our team.</p>
-        <a class="btn btn-cta" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call {{ main_phone }}</a>
-        <a class="ask-search" href="#blog-q">Search the guides</a>
+      {% if page_no == 1 %}<li class="ask-tile"><div class="card post ask">
+        <div class="cover tone-cta" aria-hidden="true"><svg class="cover-icon"><use href="#t-chat-circle-text"></use></svg><svg class="cover-mark"><use href="#t-chat-circle-text"></use></svg></div>
+        <div class="post-body">
+          <p class="meta"><span class="topic">Still have a question?</span></p>
+          <h3 class="post-title">Can't find your answer?</h3>
+          <p class="excerpt">Search all {{ post_count }} guides, or call our team. We're happy to help.</p>
+          <div class="ask-actions">
+            <a class="btn btn-cta" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call {{ main_phone }}</a>
+            <a class="ask-search" href="#blog-q">Search the guides</a>
+          </div>
+        </div>
       </div></li>{% endif %}
     </ul>
     <nav aria-label="Article pages">
