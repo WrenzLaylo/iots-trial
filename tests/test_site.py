@@ -69,8 +69,9 @@ def test_blog_page_one(site):
     assert p.texts["h1"] == ["Tips & Resources"]
     assert p.title == "Car Insurance Tips for Chicago Drivers | Insure On The Spot"
     assert len(_posts(p)) == 12
-    chips = [a["href"] for t, a in p.tags if t == "a" and "data-chip" in a]
+    chips = [a["href"] for t, a in p.tags if t == "a" and a.get("data-topic")]
     assert len(chips) == 14 and not any("uncategorized" in h for h in chips)
+    assert all(h.startswith("https://www.insureonthespot.com/category/") for h in chips)
     form = [a for t, a in p.tags if t == "form" and a.get("role") == "search"][0]
     assert form["action"] == "https://www.insureonthespot.com/" and form["method"] == "get"
     assert p.find("input", name="s")
@@ -92,16 +93,41 @@ def test_blog_pagination(site):
     hrefs = [a.get("href") for t, a in p3.tags if t == "a"]
     assert "https://www.insureonthespot.com/customer-service/blog/page/10/" in hrefs
     p1 = parse(site, "/customer-service/blog/")
-    current = [a for t, a in p1.tags if a.get("aria-current") == "page" and t == "span"]
-    assert current
+    pager = p1.html.split('class="pagination"', 1)[1].split("</nav>", 1)[0]
+    assert 'aria-current="page"' in pager
     assert "Page 3" in parse(site, "/customer-service/blog/page/3/").title
 
 
-def test_blog_mobile_quote_after_third_post(site):
+def test_blog_cta_band_after_six_cards(site):
+    for rel in ["customer-service/blog", "customer-service/blog/page/2"]:
+        html = (site / rel / "index.html").read_text(encoding="utf-8")
+        latest = html.split('id="latest"', 1)[1]
+        assert latest.split('class="cta-band"', 1)[0].count('<article class="card post') == 6, rel
+
+
+def test_blog_hero_cards_and_reading_time(site):
     html = (site / "customer-service" / "blog" / "index.html").read_text(encoding="utf-8")
-    grid = html.split('class="post-grid"', 1)[1]
-    first_quote = grid.index('class="quote-inline"')
-    assert grid[:first_quote].count('<article class="card post') == 3
+    assert '<section class="hero' in html and 'class="search"' in html
+    cards = re.findall(r'<article class="card post.*?</article>', html, flags=re.S)
+    assert len(cards) == 12
+    for card in cards:
+        assert 'class="cover tone-' in card and '<use href="#t-' in card
+        assert re.search(r"\d+ min read", card)
+    assert 'class="ask-tile"' in html  # fills the 12th grid cell on page 1
+    tile = html.split('class="ask-tile"', 1)[1].split("</li>", 1)[0]
+    assert 'class="cover tone-cta"' in tile and 'class="post-body"' in tile  # same anatomy as the post cards
+    assert '<use href="#t-chat-circle-text">' in tile and 'id="t-chat-circle-text"' in html
+
+
+def test_search_index_file(site):
+    import gzip
+    raw = (site / "assets" / "data" / "posts-index.json").read_bytes()
+    data = json.loads(raw)
+    assert data["count"] == len(data["posts"]) >= 590
+    assert len(gzip.compress(raw)) < 60_000
+    es = [p for p in data["posts"] if p[6] == "es"]
+    assert len(es) >= 40 and all(len(p) == 7 for p in data["posts"])
+
 
 
 def test_locations_cards(site):
@@ -136,7 +162,7 @@ def test_contact_page(site):
     assert p.texts["h1"] == ["Contact Us"]
     assert p.title == "Contact Insure On The Spot | Call 773-202-5060"
     html = p.html
-    assert 'class="big-phone" href="tel:+17732025060"' in html
+    assert 'class="btn btn-cta btn-lg" href="tel:+17732025060"' in html
     assert html.count('class="card dept"') == 2
     assert "8:00 AM to 8:30 PM" in html and "8:00 AM to 5:00 PM" in html
     assert html.count("Holiday hours may vary, call to confirm.") == 2
@@ -184,4 +210,32 @@ def test_jsonld_local_business_nodes_have_address(site, rel):
 def test_spanish_posts_are_marked_spanish(site, rel, title):
     html = (site / rel.strip("/") / "index.html").read_text(encoding="utf-8")
     card = re.search(r'<article class="card post[^>]*>(?:(?!</article>).)*' + re.escape(title), html, flags=re.S)
-    assert card and 'lang="es"' in card.group(0)[:200], f"{title} card is not lang=es"
+    assert card and re.search(r'class="post-title" lang="es"', card.group(0)), f"{title} title is not lang=es"
+
+
+def test_css_has_no_font_shorthand_with_inherit():
+    # `font: 700 15px inherit` is invalid CSS and silently drops the whole declaration (bit us twice)
+    css = (ROOT / "static" / "css" / "site.css").read_text(encoding="utf-8")
+    bad = [m for m in re.findall(r"font:[^;}]*", css) if "inherit" in m and m.replace(" ", "") != "font:inherit"]
+    assert not bad, bad
+
+
+@pytest.mark.parametrize("rel", ["locations", "contact"])
+def test_v3_locations_and_contact_use_the_clean_white_head(site, rel):
+    html = (site / rel / "index.html").read_text(encoding="utf-8")
+    assert '<div class="page-head">' in html and 'class="hero' not in html, rel
+    head = html.split('<div class="page-head">', 1)[1].split('class="wrap section', 1)[0]
+    assert "<h1>" in head and '<nav class="crumbs"' in head and "page-head-photo" in head
+    if rel == "contact":
+        assert 'class="btn btn-cta btn-lg" href="tel:+17732025060"' in head and 'Call 773-202-5060' in head
+        assert 'class="btn btn-outline btn-lg" href="https://quote.insureonthespot.com/"' in head and 'Get Free Quote' in head
+
+
+def test_v3_blog_keeps_the_editorial_hero(site):
+    html = (site / "customer-service" / "blog" / "index.html").read_text(encoding="utf-8")
+    assert '<section class="hero' in html and 'id="blog-q"' in html
+
+
+def test_index_cards_have_a_visible_go_arrow(site):
+    html = (site / "index.html").read_text(encoding="utf-8")
+    assert html.count('class="index-go"') == 3
