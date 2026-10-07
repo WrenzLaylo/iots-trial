@@ -7,3 +7,8 @@ __pycache__/
 qa/out/
 
 .vercel
+
+# personal submission prep (kept locally, not for reviewers)
+deliverables/FORM-ANSWERS.md
+deliverables/VIDEO-SCRIPT.md
+deliverables/submit-*/README.md
