@@ -437,3 +437,15 @@ def test_v3_cards_on_locations_and_contact_are_bordered(pw, base, path):
     page.goto(base + path, wait_until="load")
     assert page.locator(".branch").first.evaluate("el => getComputedStyle(el).borderTopWidth") == "1px"
     browser.close()
+
+
+def test_contact_ctas_stack_full_width_on_phones(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 390, "height": 844})
+    page.goto(base + "/contact/", wait_until="load")
+    call = page.locator('.page-head a.btn-cta[href="tel:+17732025060"]').bounding_box()
+    quote = page.locator(".page-head a.btn-outline").bounding_box()
+    assert call["y"] < quote["y"], "Call should sit above the quote button"
+    assert call["width"] > 320 and quote["width"] > 320, (call["width"], quote["width"])
+    assert call["height"] >= 48
+    browser.close()
