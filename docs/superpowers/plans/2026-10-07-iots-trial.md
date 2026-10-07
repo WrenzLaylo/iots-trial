@@ -28,7 +28,7 @@
 
 ## Review Focus
 
-1. **Visitor outside Chicago** (the reviewers may be in Colombia or the PH): status pills must use Chicago time, not the device's. Test: Task 7 `test_status_uses_chicago_time` (Manila timezone, fixed clock).
+1. **Visitor outside Chicago** (the reviewers may be in Colombia or the PH): status pills must use Chicago time, not the device's. Test: Task 7 `qa/test_browser.py::test_status_uses_chicago_time` (Manila timezone, fixed clock).
 2. **JavaScript blocked or failing**: hours, phone links, nav links and the quote form must still work (form submits GET to the quote URL). Test: Task 7 `test_no_js_page_still_works`.
 3. **Very narrow phones (320px)**: no sideways scrolling, Call buttons fit. Test: Task 7 `test_no_horizontal_overflow` includes 320px.
 4. **Map tiles or Leaflet blocked**: page stays usable, Google Maps fallback link visible, no uncaught errors. Test: Task 7 `test_map_failure_is_graceful`.
@@ -64,7 +64,7 @@ tests/
   conftest.py  test_data.py  test_helpers.py  test_site.py
   js/hours.test.mjs  js/quote.test.mjs
 qa/
-  serve.py  check_browser.py  check_links.py  shoot.py  lighthouse.sh
+  serve.py  test_browser.py  check_links.py  shoot.py  lighthouse.sh
   out/                              # results, gitignored
 deliverables/
   screenshots/*.png  NOTE.md
@@ -979,10 +979,11 @@ def render_all(out: Path = OUT) -> list[Path]:
     shutil.copytree(STATIC, out / "assets", ignore=shutil.ignore_patterns("icons"))
     (out / "robots.txt").write_text("User-agent: *\nAllow: /\n", encoding="utf-8")
     ctx, env = load_context(), _env()
+    env.globals.update(ctx)  # globals (not render kwargs) so macros imported from _macros.html can see them
     written = []
     for template, rel, page in pages(ctx):
         extra = page.pop("extra", {})
-        html_out = env.get_template(template).render(**ctx, **extra, page=page)
+        html_out = env.get_template(template).render(**extra, page=page)
         written.append(_write(out, rel, html_out))
     return written
 
@@ -1026,6 +1027,15 @@ Expected: `7 passed`.
     <p class="field-error" id="zip-err-{{ id }}" role="alert" hidden></p>
   </form>
 </section>
+{% endmacro %}
+
+{% macro post_card(post, featured=False) %}
+<article class="card post{% if featured %} post-featured{% endif %}">
+  <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
+  <h2 class="post-title"><a href="{{ post.link }}">{{ post.title }}</a></h2>
+  <p>{{ post.excerpt }}</p>
+  <span class="more" aria-hidden="true">Read article {{ icons['caret-right'] | safe }}</span>
+</article>
 {% endmacro %}
 
 {% macro branch_card(b, heading='h3', compact=False) %}
@@ -1227,6 +1237,7 @@ address{font-style:normal}
 .icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:12px;border:1px solid var(--line-2);background:#fff;color:var(--navy-dark);cursor:pointer;padding:0}
 .icon-btn .icon{width:22px;height:22px;vertical-align:0}
 .icon-btn-call{background:var(--cta);border-color:var(--cta)}
+.no-js .site-header{position:static} /* without JS the menu is always open, so don't pin a tall header */
 .mobile-menu ul{list-style:none;margin:0;padding:4px var(--gutter) 16px}
 .mobile-menu a:not(.btn){display:flex;align-items:center;min-height:48px;color:var(--navy-dark);font-weight:600;text-decoration:none;border-bottom:1px solid var(--line)}
 .mobile-menu .menu-cta{padding-top:12px}
@@ -1333,7 +1344,8 @@ address{font-style:normal}
 .post-title a:focus-visible{outline:none}
 .post p{margin:0;color:var(--ink-2);font-size:15.5px}
 .post .more{margin-top:auto;font-weight:700;color:var(--navy);display:inline-flex;align-items:center;gap:4px}
-.post-featured{grid-column:1/-1;padding:24px}
+.post-featured-item{grid-column:1/-1}
+.post-featured{padding:24px}
 .post-featured .post-title{font-size:clamp(22px,2.6vw,28px)}
 .quote-inline{display:none}
 .blog-side{display:grid;gap:18px;position:sticky;top:88px}
@@ -1597,7 +1609,7 @@ def test_blog_page_one(site):
     assert p.texts["h1"] == ["Tips & Resources"]
     assert p.title == "Car Insurance Tips for Chicago Drivers | Insure On The Spot"
     assert len(_posts(p)) == 12
-    chips = [a["href"] for t, a in p.tags if t == "a" and a.get("data-chip") is not None]
+    chips = [a["href"] for t, a in p.tags if t == "a" and "data-chip" in a]
     assert len(chips) == 14 and not any("uncategorized" in h for h in chips)
     form = [a for t, a in p.tags if t == "form" and a.get("role") == "search"][0]
     assert form["action"] == "https://www.insureonthespot.com/" and form["method"] == "get"
@@ -1688,15 +1700,7 @@ def pages(ctx: dict) -> list[tuple[str, str, dict]]:
 
 ```jinja
 {% extends "base.html" %}
-{% from "_macros.html" import quote_box, crumbs %}
-{% macro post_card(post, featured=False) %}
-<article class="card post{% if featured %} post-featured{% endif %}">
-  <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
-  <h2 class="post-title"><a href="{{ post.link }}">{{ post.title }}</a></h2>
-  <p>{{ post.excerpt }}</p>
-  <span class="more" aria-hidden="true">Read article {{ icons['caret-right'] | safe }}</span>
-</article>
-{% endmacro %}
+{% from "_macros.html" import quote_box, crumbs, post_card %}
 {% block main %}
 <div class="page-head">
   <div class="wrap section">
@@ -1716,7 +1720,7 @@ def pages(ctx: dict) -> list[tuple[str, str, dict]]:
       <nav aria-label="Topics"><ul class="chips">{% for c in chips %}<li><a data-chip href="{{ c.link }}">{{ c.name }}</a></li>{% endfor %}</ul></nav>
     </div>
     <ul class="post-grid">
-      {% if featured %}<li class="post-featured-item" style="grid-column:1/-1">{{ post_card(featured, True) }}</li>{% endif %}
+      {% if featured %}<li class="post-featured-item">{{ post_card(featured, True) }}</li>{% endif %}
       {% for post in posts %}
       <li>{{ post_card(post) }}</li>
       {% if loop.index == (2 if featured else 3) %}<li class="quote-inline">{{ quote_box('inline', heading='h2') }}</li>{% endif %}
@@ -1776,7 +1780,7 @@ vercel deploy
 - Modify: `build/build.py` (`pages()`), `tests/test_site.py`
 
 **Interfaces:**
-- Consumes: `branch_card`, `quote_box`, `crumbs`, `jsonld.agency`, `jsonld.breadcrumbs`, `branches` (with `hours_rows`, `directions`), `images['locations-hero.webp']`, `links.gmaps_all`.
+- Consumes: `branch_card`, `quote_box`, `crumbs`, `jsonld.organization`, `jsonld.agency`, `jsonld.breadcrumbs`, `branches` (with `hours_rows`, `directions`), `images['locations-hero.webp']`, `links.gmaps_all`.
 - Produces: `site/locations/index.html`; map DOM contract `<div class="map-panel" data-map data-points='[{"name","address","phone","tel","lat","lng"}]'><div class="map-canvas" ...></div>...`. `map.js` exports `initMap()`.
 
 - [ ] **Step 1: Branch**
@@ -1803,7 +1807,7 @@ def test_locations_cards(site):
 
 def test_locations_schema_and_map(site):
     p = parse(site, "/locations/")
-    agencies = [b for b in p.jsonld if b["@type"] == "InsuranceAgency"]
+    agencies = [b for b in p.jsonld if "parentOrganization" in b]
     assert len(agencies) == 4
     assert all(b["address"]["addressRegion"] == "IL" and b["openingHoursSpecification"] for b in agencies)
     panel = [a for t, a in p.tags if "data-map" in a][0]
@@ -1830,7 +1834,7 @@ def locations_page(ctx):
         "description": ("Visit Insure On The Spot in Chicago (N Elston Ave and S Cicero Ave), Berwyn and Melrose Park. "
                         "Hours, phone numbers, directions and free parking."),
         "crumbs": [("Home", ctx["links"]["home"]), ("Locations", "/locations/")],
-        "jsonld": [jsonld.agency(b) for b in ctx["branches"]] +
+        "jsonld": [jsonld.organization()] + [jsonld.agency(b) for b in ctx["branches"]] +
                   [jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Locations", f"{PROD}/locations/")])],
         "extra": {"points": points},
     })
@@ -1882,7 +1886,7 @@ and change the `pages()` return to `return [home] + blog_pages(ctx) + [locations
 {% endblock %}
 ```
 
-- [ ] **Step 5: Write `static/js/map.js`**
+- [ ] **Step 5: Write `static/js/map.js`** (spec "Could" tier: if the evening is running late, skip this file; the "View on Google Maps" link already covers it)
 
 ```js
 function loadCss(href) {
@@ -1966,7 +1970,7 @@ vercel deploy
 - Modify: `build/build.py` (`pages()`), `tests/test_site.py`
 
 **Interfaces:**
-- Consumes: `branch_card(compact=True)`, `status`, `hours_list`, `quote_box`, `crumbs`, `departments`, `jsonld.contact_page`, `jsonld.breadcrumbs`, `jsonld.organization`, `images['contact-photo.webp']`.
+- Consumes: `branch_card(compact=True)`, `status`, `hours_list`, `quote_box`, `crumbs`, `departments`, `jsonld.contact_page`, `jsonld.breadcrumbs`, `images['contact-photo.webp']`.
 - Produces: `site/contact/index.html`.
 
 - [ ] **Step 1: Branch**
@@ -2121,7 +2125,7 @@ vercel deploy
 ### Task 7: QA in real browsers (accessibility, layout, failure modes, links, performance)
 
 **Files:**
-- Create: `qa/serve.py`, `qa/check_browser.py`, `qa/check_links.py`, `qa/lighthouse.sh`
+- Create: `qa/serve.py`, `qa/test_browser.py`, `qa/check_links.py`, `qa/lighthouse.sh`, `pytest.ini`
 - Modify: any template/CSS file where QA finds a problem
 
 **Interfaces:**
@@ -2156,7 +2160,13 @@ def serve(port=8765):
         httpd.shutdown()
 ```
 
-- [ ] **Step 3: Write `qa/check_browser.py`** (pytest file, runs against the local build)
+- [ ] **Step 3: Write `qa/test_browser.py`** (pytest file, runs against the local build; `pytest.ini` keeps it out of the default run)
+
+`pytest.ini`:
+```ini
+[pytest]
+testpaths = tests
+```
 
 ```python
 import json
@@ -2310,9 +2320,13 @@ def teardown_module():
 Run:
 ```bash
 py -3.11 -m playwright install firefox webkit
-py -3.11 -m pytest qa/check_browser.py -q -p no:cacheprovider --rootdir qa
+py -3.11 -m pytest qa/test_browser.py -q
 ```
 Expected: all pass. For each failure, fix the template/CSS, rebuild (`py -3.11 build/build.py`), rerun the one failing test, then the whole file.
+
+- [ ] **Step 3b: Manual keyboard pass (spec testing item 3)**
+
+With the local server running, use only Tab / Shift+Tab / Enter / Esc at 1440px and 390px on each page. Check: skip link appears first and jumps to the content; every topic chip, card, button and link is reachable in visual order with a visible focus ring; the whole blog card highlights when its title link has focus; the map does not trap focus (Tab moves past it). Fix anything that fails, rebuild, recheck. Note the result in `qa/out/summary.md`.
 
 - [ ] **Step 4: Write `qa/check_links.py`**
 
@@ -2497,6 +2511,10 @@ curl -s "$URL/robots.txt"                                             # expect A
 curl -s -o /dev/null -w "%{http_code} %{redirect_url}\n" "$URL/locations"   # expect 308 -> /locations/
 ```
 Then open `$URL/` in a private browser window (logged out of Vercel) and click through all three pages. Wrenz opens it on his phone too.
+
+- [ ] **Step 3b: Structured data check (spec testing item 5)**
+
+Paste `$URL/locations/`, `$URL/contact/` and `$URL/customer-service/blog/` into https://validator.schema.org/ (it fetches noindexed pages). Expected: no errors. Record "schema: 0 errors" in `qa/out/summary.md`.
 
 - [ ] **Step 4: Screenshots**
 
