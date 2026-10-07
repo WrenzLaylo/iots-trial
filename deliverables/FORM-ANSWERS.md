@@ -2,7 +2,7 @@
 
 ## Video walkthrough (Loom or similar)
 Option A (recommended): record a short Loom with your voice, using the script at the bottom of this file, while clicking through https://iots-trial.vercel.app.
-Option B: upload `deliverables/walkthrough-v3.mp4` (1:25, captioned, no voice) to Loom ("Upload a video") or to Google Drive (share: anyone with the link), and paste that link.
+Option B: upload `deliverables/walkthrough-v3.mp4` (1:32, captioned, no voice) to Loom ("Upload a video") or to Google Drive (share: anyone with the link), and paste that link.
 
 ## Repository or files
 https://github.com/WrenzLaylo/iots-trial (public; the open pull requests show the build page by page, v3 is PR #9)
@@ -12,7 +12,7 @@ https://iots-trial.vercel.app (v3: editorial blog with instant search, clean Loc
 (v1, closer to the current design: https://iots-trial-classic.vercel.app)
 
 ## Upload a file
-`deliverables/IOTS-trial-v3-Wrenz-Laylo.zip` (10.3 MB: note, 26-item audit, QA results, desktop + phone screenshots, walkthrough video)
+`deliverables/IOTS-trial-v3-Wrenz-Laylo.zip` (10.2 MB: note, 26-item audit, QA results, desktop + phone screenshots, walkthrough video)
 If you send v1 instead: `deliverables/IOTS-trial-v1-Wrenz-Laylo.zip` (4.3 MB)
 
 ## Your approach
@@ -38,5 +38,5 @@ Also noticed (outside the 3 pages): two Google Tag Manager containers load on ev
 4. (Type 'insurence') "If nothing matches, you don't hit a dead end: you get a suggestion, popular topics, and a phone number."
 5. (Click Coverages, page 2, Back) "Topics filter instantly, with pagination, and Back works because the state is in the URL."
 6. (Locations) "On Locations, every branch is now tap-to-call, with its hours and a live open or closed label in Chicago time. Before, hours were four pages away."
-7. (Contact) "Contact puts the phone number first, with phone hours, quick links and every branch. I didn't add a form, because someone has to answer it, so that's a question for you."
+7. (Contact) "Contact now opens with two buttons: call, or get a quote. Below that are the phone hours, quick links and every branch. I didn't add a form, because someone has to answer it, so that's a question for you."
 8. (Close) "I tested it in three browsers, with an accessibility scan, keyboard only, JavaScript off and slow connections. Lighthouse mobile went from the high 20s to 97 to 100. Thanks for watching."
