@@ -1,0 +1,33 @@
+<div class="topbar">
+  <div class="wrap">
+    <p class="topbar-left"><a class="topbar-call" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call now {{ main_phone }}</a><span aria-hidden="true">|</span><a href="{{ links.espanol }}" lang="es" hreflang="es">Español</a></p>
+    <ul>{% for l in nav_top %}<li><a href="{{ l.href }}"{% if l.href == page.path %} aria-current="page"{% endif %}>{{ l.label }}</a></li>{% endfor %}</ul>
+  </div>
+</div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/img/logo.png" alt="Insure On The Spot, preview home" width="{{ images['logo.png'][0] }}" height="{{ images['logo.png'][1] }}"></a>
+    <nav class="main-nav" aria-label="Main">
+      <ul>
+        {% for l in nav_main %}<li><a href="{{ l.href }}"{% if page.path.startswith(l.href) and l.href.startswith('/') %} aria-current="page"{% endif %}>{{ l.label }}</a></li>{% endfor %}
+        <li><a class="btn btn-cta" href="{{ links.quote }}">Get Free Quote</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <a class="icon-btn icon-btn-call" href="tel:{{ main_tel }}" aria-label="Call {{ main_phone }}">{{ icons.phone | safe }}</a>
+      <button class="icon-btn" type="button" data-menu-toggle aria-controls="site-menu" aria-expanded="false" aria-label="Open menu"><span data-icon-open>{{ icons.list | safe }}</span><span data-icon-close hidden>{{ icons.x | safe }}</span></button>
+    </div>
+  </div>
+  <nav id="site-menu" class="mobile-menu" aria-label="Menu">
+    <ul>
+      {% for l in nav_main %}<li><a href="{{ l.href }}">{{ l.label }}</a></li>{% endfor %}
+      <li><a href="{{ links.locations }}">Locations</a></li>
+      <li><a href="{{ links.contact }}">Contact Us</a></li>
+      <li><a href="{{ links.customer_service }}">Customer Service</a></li>
+      <li><a href="{{ links.portal }}">Make My Payment</a></li>
+      <li><a href="{{ links.portal }}">Renew My Policy</a></li>
+      <li><a href="{{ links.espanol }}" lang="es" hreflang="es">Español</a></li>
+      <li class="menu-cta"><a class="btn btn-cta" href="{{ links.quote }}">Get Free Quote</a></li>
+    </ul>
+  </nav>
+</header>

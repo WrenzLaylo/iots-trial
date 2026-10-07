@@ -1,0 +1,61 @@
+{% macro status(hours) %}<span class="status" data-hours='{{ hours | tojson }}' hidden></span>{% endmacro %}
+
+{% macro hours_list(rows) %}
+<dl class="hours">
+{% for r in rows %}<div data-day="{{ r.days }}"><dt>{{ r.label }}</dt><dd>{{ r.text }}</dd></div>{% endfor %}
+</dl>
+{% endmacro %}
+
+{% macro crumbs(items) %}
+<nav class="crumbs" aria-label="Breadcrumb"><ol>
+{% for label, href in items %}<li>{% if loop.last %}<span aria-current="page">{{ label }}</span>{% else %}<a href="{{ href }}">{{ label }}</a>{% endif %}</li>{% endfor %}
+</ol></nav>
+{% endmacro %}
+
+{% macro quote_box(id, heading='h2', compact=False) %}
+<section class="quote-box{% if compact %} is-compact{% endif %}" aria-labelledby="quote-h-{{ id }}">
+  <{{ heading }} id="quote-h-{{ id }}">Get a free auto insurance quote</{{ heading }}>
+  {% if not compact %}<ul class="perks"><li>Lowest rates in Chicagoland</li><li>We shop, you save</li><li>SR22s filed electronically</li></ul>{% endif %}
+  <form action="{{ links.quote }}" method="get" data-quote novalidate>
+    <label for="zip-{{ id }}">ZIP code</label>
+    <div class="quote-row">
+      <input id="zip-{{ id }}" name="zipcode" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" aria-describedby="zip-err-{{ id }}">
+      <button class="btn btn-cta" type="submit">Get Free Quote</button>
+    </div>
+    <p class="field-error" id="zip-err-{{ id }}" role="alert" hidden></p>
+  </form>
+</section>
+{% endmacro %}
+
+{% macro post_card(post, featured=False) %}
+<article class="card post{% if featured %} post-featured{% endif %}">
+  <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
+  <h2 class="post-title"><a href="{{ post.link }}">{{ post.title }}</a></h2>
+  <p>{{ post.excerpt }}</p>
+  <span class="more" aria-hidden="true">Read article {{ icons['caret-right'] | safe }}</span>
+</article>
+{% endmacro %}
+
+{% macro branch_card(b, heading='h3', compact=False) %}
+<article class="card branch" id="{{ b.id }}">
+  <div class="branch-head">
+    <div>
+      <{{ heading }}>{{ b.name }}</{{ heading }}>
+      {% if b.note %}<p class="note">{{ b.note }}</p>{% endif %}
+    </div>
+    {{ status(b.hours) }}
+  </div>
+  <address>{{ b.street }}, {{ b.city }}, {{ b.state }} {{ b.zip }}</address>
+  {% if not compact %}
+  {{ hours_list(b.hours_rows) }}
+  <p class="holiday">{{ holiday_note }}</p>
+  {% endif %}
+  <div class="actions">
+    <a class="btn btn-primary call-btn" href="tel:{{ b.tel }}">{{ icons.phone | safe }}<span>Call {{ b.phone }}<span class="visually-hidden"> ({{ b.name }})</span></span></a>
+    <span class="link-row">
+      <a href="{{ b.directions }}" target="_blank" rel="noopener">{{ icons['navigation-arrow'] | safe }}Directions<span class="visually-hidden"> to {{ b.name }}, opens Google Maps</span></a>
+      {% if not compact %}<a href="{{ b.url }}">Branch details<span class="visually-hidden">: {{ b.name }}</span></a>{% endif %}
+    </span>
+  </div>
+</article>
+{% endmacro %}
