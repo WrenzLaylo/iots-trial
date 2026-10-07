@@ -6,7 +6,7 @@ import pytest
 
 from conftest import ROOT, parse
 
-PAGES = ["/", "/customer-service/blog/", "/customer-service/blog/page/2/", "/customer-service/blog/page/3/", "/locations/"]
+PAGES = ["/", "/customer-service/blog/", "/customer-service/blog/page/2/", "/customer-service/blog/page/3/", "/locations/", "/contact/"]
 
 
 @pytest.mark.parametrize("rel", PAGES)
@@ -129,3 +129,33 @@ def test_locations_schema_and_map(site):
 
 def test_locations_title(site):
     assert parse(site, "/locations/").title == "Chicago, Berwyn & Melrose Park Offices | Insure On The Spot"
+
+
+def test_contact_page(site):
+    p = parse(site, "/contact/")
+    assert p.texts["h1"] == ["Contact Us"]
+    assert p.title == "Contact Insure On The Spot | Call 773-202-5060"
+    html = p.html
+    assert 'class="big-phone" href="tel:+17732025060"' in html
+    assert html.count('class="card dept"') == 2
+    assert "8:00 AM to 8:30 PM" in html and "8:00 AM to 5:00 PM" in html
+    assert html.count("Holiday hours may vary, call to confirm.") == 2
+    assert html.count('<article class="card branch"') == 4
+    forms = [a for t, a in p.tags if t == "form"]
+    assert forms and all("data-quote" in a for a in forms), "no contact form, only quote forms"
+    assert "/assets/img/contact-photo.webp" in html and "iots-hero" not in html
+    assert "Chicago&#39;s #1 Auto Insurance Agency" in html or "Chicago's #1 Auto Insurance Agency" in html
+    types = {b["@type"] for b in p.jsonld}
+    assert {"ContactPage", "BreadcrumbList"} <= types
+
+
+def test_contact_task_links(site):
+    p = parse(site, "/contact/")
+    hrefs = {a.get("href") for t, a in p.tags if t == "a"}
+    for url in ["https://quote.insureonthespot.com/", "https://csp.insureonthespot.com/Login.aspx",
+                "https://www.insureonthespot.com/customer-service/report-insurance-claim/",
+                "https://www.insureonthespot.com/customer-service/roadside-assistance/",
+                "https://www.insureonthespot.com/customer-service/auto-insurance-faq/",
+                "https://www.insureonthespot.com/see-what-our-customers-are-saying-about-us/",
+                "https://www.insureonthespot.com/employment-opportunities/"]:
+        assert url in hrefs, url

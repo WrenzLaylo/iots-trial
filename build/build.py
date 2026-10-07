@@ -168,11 +168,23 @@ def locations_page(ctx):
     })
 
 
+def contact_page(ctx):
+    return ("contact.html", "contact", {
+        "slug": "contact", "path": "/contact/",
+        "title": "Contact Insure On The Spot | Call 773-202-5060",
+        "description": ("Call Insure On The Spot at 773-202-5060 or visit one of 4 Chicagoland offices. "
+                        "Customer service and sales hours, payments, claims and free quotes."),
+        "crumbs": [("Home", ctx["links"]["home"]), ("Contact Us", "/contact/")],
+        "jsonld": [jsonld.contact_page(),
+                   jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Contact Us", f"{PROD}/contact/")])],
+    })
+
+
 def pages(ctx: dict) -> list[tuple[str, str, dict]]:
     home = ("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
                                "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
                                "jsonld": [], "crumbs": []})
-    return [home] + blog_pages(ctx) + [locations_page(ctx)]
+    return [home] + blog_pages(ctx) + [locations_page(ctx), contact_page(ctx)]
 
 
 def render_all(out: Path = OUT) -> list[Path]:
