@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import branch_card, quote_box, crumbs %}
+{% block main %}
+<div class="page-head">
+  <div class="wrap page-head-grid">
+    <div class="page-head-text">
+      {{ crumbs(page.crumbs) }}
+      <h1>Our Locations</h1>
+      <p class="lede">Come in and see us! Our friendly staff is here to help. Get a free quote, buy, renew your policy, or make a payment at any of our Chicagoland offices.</p>
+      <ul class="facts">
+        <li>{{ icons.storefront | safe }}4 offices</li>
+        <li>{{ icons.car | safe }}Free parking at each</li>
+      </ul>
+    </div>
+    <div class="page-head-photo">
+      <img src="/assets/img/locations-hero.webp" alt="Smiling Insure On The Spot agent leaning out of a car window" width="{{ images['locations-hero.webp'][0] }}" height="{{ images['locations-hero.webp'][1] }}" fetchpriority="high">
+    </div>
+  </div>
+</div>
+<section class="wrap section" aria-labelledby="offices-h">
+  <h2 id="offices-h" class="section-title">Find an office near you</h2>
+  <div class="loc-layout">
+    <ul class="branch-list">
+      {% for b in branches %}<li>{{ branch_card(b, heading='h3') }}</li>{% endfor %}
+    </ul>
+    <div class="map-panel" data-map data-points='{{ points | tojson }}'>
+      <div class="map-canvas" role="region" aria-label="Map of our 4 offices"></div>
+      <p class="link-row"><a href="{{ links.gmaps_all }}" target="_blank" rel="noopener">{{ icons['map-pin'] | safe }}View on Google Maps</a><a href="{{ links.location_finder }}">Location Finder</a><a href="{{ links.service_areas }}">Additional areas served</a></p>
+    </div>
+  </div>
+</section>
+<section class="wrap section after-grid" aria-label="Offers">
+  <div class="promo">
+    <h2>{{ icons.gift | safe }} Free $100 Amazon gift card</h2>
+    <p>Refer friends and family. They mention your client code, and when their policy starts you get a $100 gift card.</p>
+  </div>
+  {{ quote_box('locations', heading='h2') }}
+</section>
+{% endblock %}

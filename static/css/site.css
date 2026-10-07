@@ -114,7 +114,7 @@ address{font-style:normal}
 .branch .actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;margin-top:12px}
 @media (max-width:767px){
   .branch .call-btn{width:100%;min-height:48px}
-  .branch-head{flex-wrap:wrap}
+  .branch-head{flex-direction:column;align-items:flex-start;gap:8px}
 }
 
 /* locations */

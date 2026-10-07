@@ -153,11 +153,26 @@ def blog_pages(ctx):
     return out
 
 
+def locations_page(ctx):
+    points = [{"name": b["name"], "address": f"{b['street']}, {b['city']}, {b['state']} {b['zip']}",
+               "phone": b["phone"], "tel": b["tel"], "lat": b["lat"], "lng": b["lng"]} for b in ctx["branches"]]
+    return ("locations.html", "locations", {
+        "slug": "locations", "path": "/locations/",
+        "title": "Chicago, Berwyn & Melrose Park Offices | Insure On The Spot",
+        "description": ("Visit Insure On The Spot in Chicago (N Elston Ave and S Cicero Ave), Berwyn and Melrose Park. "
+                        "Hours, phone numbers, directions and free parking."),
+        "crumbs": [("Home", ctx["links"]["home"]), ("Locations", "/locations/")],
+        "jsonld": [jsonld.organization()] + [jsonld.agency(b) for b in ctx["branches"]] +
+                  [jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Locations", f"{PROD}/locations/")])],
+        "extra": {"points": points},
+    })
+
+
 def pages(ctx: dict) -> list[tuple[str, str, dict]]:
     home = ("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
                                "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
                                "jsonld": [], "crumbs": []})
-    return [home] + blog_pages(ctx)
+    return [home] + blog_pages(ctx) + [locations_page(ctx)]
 
 
 def render_all(out: Path = OUT) -> list[Path]:

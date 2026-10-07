@@ -6,7 +6,7 @@ import pytest
 
 from conftest import ROOT, parse
 
-PAGES = ["/", "/customer-service/blog/", "/customer-service/blog/page/2/", "/customer-service/blog/page/3/"]
+PAGES = ["/", "/customer-service/blog/", "/customer-service/blog/page/2/", "/customer-service/blog/page/3/", "/locations/"]
 
 
 @pytest.mark.parametrize("rel", PAGES)
@@ -102,3 +102,30 @@ def test_blog_mobile_quote_after_third_post(site):
     grid = html.split('class="post-grid"', 1)[1]
     first_quote = grid.index('class="quote-inline"')
     assert grid[:first_quote].count('<article class="card post') == 3
+
+
+def test_locations_cards(site):
+    p = parse(site, "/locations/")
+    assert p.texts["h1"] == ["Our Locations"]
+    html = p.html
+    assert html.count('<article class="card branch"') == 4
+    for tel in ["tel:+17732025060", "tel:+17732020651", "tel:+17088577661", "tel:+17085471800"]:
+        assert f'href="{tel}"' in html
+    assert html.count("Holiday hours may vary, call to confirm.") == 4
+    assert html.count("data-hours=") == 4
+    assert "Mon-Fri" in html and "9:30 AM to 6:00 PM" in html and "8:00 AM to 2:00 PM" in html
+
+
+def test_locations_schema_and_map(site):
+    p = parse(site, "/locations/")
+    agencies = [b for b in p.jsonld if "parentOrganization" in b]
+    assert len(agencies) == 4
+    assert all(b["address"]["addressRegion"] == "IL" and b["openingHoursSpecification"] for b in agencies)
+    panel = [a for t, a in p.tags if "data-map" in a][0]
+    points = json.loads(panel["data-points"])
+    assert len(points) == 4 and all(41.6 < x["lat"] < 42.1 for x in points)
+    assert "https://www.google.com/maps/search/?api=1&amp;query=Insure+On+The+Spot+Chicago+IL" in p.html
+
+
+def test_locations_title(site):
+    assert parse(site, "/locations/").title == "Chicago, Berwyn & Melrose Park Offices | Insure On The Spot"
