@@ -13,7 +13,7 @@
 {% endmacro %}
 
 {% macro quote_box(id, heading='h2', compact=False) %}
-<section class="quote-box{% if compact %} is-compact{% endif %}" aria-labelledby="quote-h-{{ id }}">
+{% set tag = "div" if compact else "section" %}<{{ tag }} class="quote-box{% if compact %} is-compact{% endif %}"{% if not compact %} aria-labelledby="quote-h-{{ id }}"{% endif %}>
   <{{ heading }} id="quote-h-{{ id }}">Get a free auto insurance quote</{{ heading }}>
   {% if not compact %}<ul class="perks"><li>Lowest rates in Chicagoland</li><li>We shop, you save</li><li>SR22s filed electronically</li></ul>{% endif %}
   <form action="{{ links.quote }}" method="get" data-quote novalidate>
@@ -24,7 +24,7 @@
     </div>
     <p class="field-error" id="zip-err-{{ id }}" role="alert" hidden></p>
   </form>
-</section>
+</{{ tag }}>
 {% endmacro %}
 
 {% macro post_card(post, featured=False) %}
