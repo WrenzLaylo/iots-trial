@@ -162,7 +162,7 @@ def test_contact_page(site):
     assert p.texts["h1"] == ["Contact Us"]
     assert p.title == "Contact Insure On The Spot | Call 773-202-5060"
     html = p.html
-    assert 'class="big-phone" href="tel:+17732025060"' in html
+    assert 'class="btn btn-cta btn-lg" href="tel:+17732025060"' in html
     assert html.count('class="card dept"') == 2
     assert "8:00 AM to 8:30 PM" in html and "8:00 AM to 5:00 PM" in html
     assert html.count("Holiday hours may vary, call to confirm.") == 2
@@ -221,13 +221,21 @@ def test_css_has_no_font_shorthand_with_inherit():
 
 
 @pytest.mark.parametrize("rel", ["locations", "contact"])
-def test_hero_band_on_locations_and_contact(site, rel):
+def test_v3_locations_and_contact_use_the_clean_white_head(site, rel):
     html = (site / rel / "index.html").read_text(encoding="utf-8")
-    hero = html.split('<section class="hero has-photo">', 1)
-    assert len(hero) == 2, f"{rel}: no hero band with photo"
-    block = hero[1].split("</section>", 1)[0]
-    assert "<h1>" in block and '<nav class="crumbs"' in block
+    assert '<div class="page-head">' in html and 'class="hero' not in html, rel
+    head = html.split('<div class="page-head">', 1)[1].split('class="wrap section', 1)[0]
+    assert "<h1>" in head and '<nav class="crumbs"' in head and "page-head-photo" in head
     if rel == "contact":
-        assert 'class="big-phone" href="tel:+17732025060"' in block
-    else:
-        assert "4 offices" in block
+        assert 'class="btn btn-cta btn-lg" href="tel:+17732025060"' in head and 'Call 773-202-5060' in head
+        assert 'class="btn btn-outline btn-lg" href="https://quote.insureonthespot.com/"' in head and 'Get Free Quote' in head
+
+
+def test_v3_blog_keeps_the_editorial_hero(site):
+    html = (site / "customer-service" / "blog" / "index.html").read_text(encoding="utf-8")
+    assert '<section class="hero' in html and 'id="blog-q"' in html
+
+
+def test_index_cards_have_a_visible_go_arrow(site):
+    html = (site / "index.html").read_text(encoding="utf-8")
+    assert html.count('class="index-go"') == 3

@@ -414,3 +414,38 @@ def test_hanging_index_times_out_to_wordpress_search(pw, base):
     page.wait_for_selector(".notice", timeout=5000)
     assert page.locator('.notice a[href="https://www.insureonthespot.com/?s=sr22"]').count() == 1
     browser.close()
+
+
+def test_index_cards_change_colour_on_hover(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1440, "height": 900})
+    page.goto(base + "/", wait_until="load")
+    card = page.locator(".index-links a").first
+    style = "el => { const c = getComputedStyle(el); return [c.backgroundColor, c.borderTopColor, getComputedStyle(el.querySelector('strong')).color].join('|'); }"
+    before = card.evaluate(style)
+    card.hover()
+    page.wait_for_timeout(400)
+    after = card.evaluate(style)
+    assert before != after, before
+    browser.close()
+
+
+@pytest.mark.parametrize("path", ["/locations/", "/contact/"])
+def test_v3_cards_on_locations_and_contact_are_bordered(pw, base, path):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 1440, "height": 900})
+    page.goto(base + path, wait_until="load")
+    assert page.locator(".branch").first.evaluate("el => getComputedStyle(el).borderTopWidth") == "1px"
+    browser.close()
+
+
+def test_contact_ctas_stack_full_width_on_phones(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 390, "height": 844})
+    page.goto(base + "/contact/", wait_until="load")
+    call = page.locator('.page-head a.btn-cta[href="tel:+17732025060"]').bounding_box()
+    quote = page.locator(".page-head a.btn-outline").bounding_box()
+    assert call["y"] < quote["y"], "Call should sit above the quote button"
+    assert call["width"] > 320 and quote["width"] > 320, (call["width"], quote["width"])
+    assert call["height"] >= 48
+    browser.close()

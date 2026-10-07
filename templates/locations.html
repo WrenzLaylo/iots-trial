@@ -1,13 +1,22 @@
 {% extends "base.html" %}
-{% from "_macros.html" import branch_card, quote_box, hero %}
+{% from "_macros.html" import branch_card, quote_box, crumbs %}
 {% block main %}
-{% call hero(page.crumbs, "Our Locations", "Come in and see us! Our friendly staff is here to help. Get a free quote, buy, renew your policy, or make a payment at any of our Chicagoland offices.",
-            photo={"src": "/assets/img/locations-hero.webp", "alt": "Smiling Insure On The Spot team member leaning out of a car window", "w": images["locations-hero.webp"][0], "h": images["locations-hero.webp"][1], "pos": "70% 30%"}) %}
-  <ul class="facts">
-    <li>{{ icons.storefront | safe }}4 offices</li>
-    <li>{{ icons.car | safe }}Free parking at each</li>
-  </ul>
-{% endcall %}
+<div class="page-head">
+  <div class="wrap page-head-grid">
+    <div class="page-head-text">
+      {{ crumbs(page.crumbs) }}
+      <h1>Our Locations</h1>
+      <p class="lede">Come in and see us! Our friendly staff is here to help. Get a free quote, buy, renew your policy, or make a payment at any of our Chicagoland offices.</p>
+      <ul class="facts">
+        <li>{{ icons.storefront | safe }}4 offices</li>
+        <li>{{ icons.car | safe }}Free parking at each</li>
+      </ul>
+    </div>
+    <div class="page-head-photo">
+      <img src="/assets/img/locations-hero.webp" alt="Smiling Insure On The Spot team member leaning out of a car window" width="{{ images['locations-hero.webp'][0] }}" height="{{ images['locations-hero.webp'][1] }}" fetchpriority="high">
+    </div>
+  </div>
+</div>
 <section class="wrap section" aria-labelledby="offices-h">
   <h2 id="offices-h" class="section-title">Find an office near you</h2>
   <div class="loc-layout">
