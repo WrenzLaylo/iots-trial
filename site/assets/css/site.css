@@ -163,8 +163,6 @@ address{font-style:normal}
 @media (max-width:767px){.hero-grid{padding-top:22px;padding-bottom:24px}.hero.has-photo .hero-grid{grid-template-columns:1fr}.hero-photo{display:none}}
 
 .hero .facts{color:#fff}.hero .facts .icon{color:var(--cta)}
-.hero .big-phone{color:var(--cta);font-size:clamp(30px,4.4vw,44px)}.hero .big-phone .icon{color:var(--cta)}
-.hero .big-phone:hover{color:#fff}
 .branch,.dept{transition:box-shadow .2s ease}
 .promo{border-radius:16px}
 /* search field + topic chips (in the hero) */
@@ -289,8 +287,13 @@ address{font-style:normal}
 
 /* contact */
 .contact-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:24px;align-items:start}
-.big-phone{display:inline-flex;align-items:center;gap:10px;min-height:44px;font-size:clamp(26px,4vw,34px);font-weight:800;color:var(--navy-dark);text-decoration:none}
-.big-phone .icon{color:var(--navy)}
+/* Contact head: the phone number is the primary button, quote is the quieter secondary */
+.head-ctas{display:flex;flex-wrap:wrap;gap:12px;margin-top:4px}
+.btn-lg{min-height:52px;padding:14px 22px;font-size:17px;border-radius:12px}
+.btn-lg .icon{width:20px;height:20px}
+.btn-outline{background:#fff;border:2px solid var(--navy);color:var(--navy)}
+.btn-outline:hover{background:#eef6fb;color:var(--navy-dark);border-color:var(--navy-dark)}
+@media (max-width:767px){.head-ctas{flex-direction:column}.head-ctas .btn{width:100%}}
 .dept-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}
 .dept h3{margin:0}
 .dept .branch-head{margin-bottom:4px}
