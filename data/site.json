@@ -1,0 +1,68 @@
+{
+  "links": {
+    "home": "https://www.insureonthespot.com/",
+    "quote": "https://quote.insureonthespot.com/",
+    "portal": "https://csp.insureonthespot.com/Login.aspx",
+    "sr22": "https://www.insureonthespot.com/sr22-insurance/",
+    "about": "https://www.insureonthespot.com/about/",
+    "motorcycle": "https://www.insureonthespot.com/auto-insurance/motorcycle-insurance/",
+    "customer_service": "https://www.insureonthespot.com/customer-service/",
+    "payment_options": "https://www.insureonthespot.com/customer-service/payment-options/",
+    "roadside": "https://www.insureonthespot.com/customer-service/roadside-assistance/",
+    "claim": "https://www.insureonthespot.com/customer-service/report-insurance-claim/",
+    "faq": "https://www.insureonthespot.com/customer-service/auto-insurance-faq/",
+    "employment": "https://www.insureonthespot.com/employment-opportunities/",
+    "service_areas": "https://www.insureonthespot.com/service-areas/",
+    "location_finder": "https://www.insureonthespot.com/location-finder/",
+    "ilivs": "https://www.insureonthespot.com/customer-service/ilivs-illinois-insurance-verification-system/",
+    "reviews": "https://www.insureonthespot.com/see-what-our-customers-are-saying-about-us/",
+    "affiliate": "https://quote.insureonthespot.com/Default.aspx/dealer",
+    "privacy": "https://www.insureonthespot.com/privacy-policy/",
+    "sitemap": "https://www.insureonthespot.com/sitemap/",
+    "terms": "https://www.insureonthespot.com/terms-conditions/",
+    "espanol": "https://www.insureonthespot.com/espanol/",
+    "bbb": "https://www.bbb.org/chicago/business-reviews/auto-insurance/insure-on-the-spot-in-chicago-il-14007680/",
+    "search": "https://www.insureonthespot.com/",
+    "blog_older": "https://www.insureonthespot.com/customer-service/blog/page/10/",
+    "gmaps_all": "https://www.google.com/maps/search/?api=1&query=Insure+On+The+Spot+Chicago+IL",
+    "blog": "/customer-service/blog/",
+    "locations": "/locations/",
+    "contact": "/contact/"
+  },
+  "nav_top": [
+    {"label": "Make My Payment", "key": "portal"},
+    {"label": "Renew My Policy", "key": "portal"},
+    {"label": "Customer Service", "key": "customer_service"},
+    {"label": "Locations", "key": "locations"},
+    {"label": "Contact Us", "key": "contact"}
+  ],
+  "nav_main": [
+    {"label": "Auto Insurance", "key": "home"},
+    {"label": "SR22 Insurance", "key": "sr22"},
+    {"label": "About Us", "key": "about"},
+    {"label": "Blog", "key": "blog"}
+  ],
+  "footer": [
+    {"heading": "Services", "items": [
+      {"label": "Auto Insurance", "key": "home"}, {"label": "SR22 Insurance", "key": "sr22"},
+      {"label": "Motorcycle Insurance", "key": "motorcycle"}, {"label": "Get Free Quote", "key": "quote"},
+      {"label": "Make My Payment", "key": "portal"}, {"label": "Renew My Policy", "key": "portal"}]},
+    {"heading": "Locations", "items": [
+      {"label": "Corporate Headquarters", "href": "https://www.insureonthespot.com/locations/corporate-headquarters/"},
+      {"label": "Chicago, IL South", "href": "https://www.insureonthespot.com/locations/chicago-il-south/"},
+      {"label": "Berwyn, IL", "href": "https://www.insureonthespot.com/locations/berwyn-il/"},
+      {"label": "Melrose Park, IL", "href": "https://www.insureonthespot.com/locations/melrose-park-il/"},
+      {"label": "Additional Areas Served", "key": "service_areas"}]},
+    {"heading": "Need Help?", "items": [
+      {"label": "Easy Payment Options", "key": "payment_options"}, {"label": "Report a Claim", "key": "claim"},
+      {"label": "Auto Insurance FAQs", "key": "faq"}, {"label": "Tips & Resources (Articles)", "key": "blog"},
+      {"label": "Contact Us", "key": "contact"}, {"label": "Employment Opportunities", "key": "employment"},
+      {"label": "Location Finder", "key": "location_finder"},
+      {"label": "ILIVS Illinois Insurance Verification System", "key": "ilivs"},
+      {"label": "See what our customers are saying", "key": "reviews"}]}
+  ],
+  "legal": [
+    {"label": "Affiliate Login", "key": "affiliate"}, {"label": "Privacy Policy", "key": "privacy"},
+    {"label": "Sitemap", "key": "sitemap"}, {"label": "Terms & Conditions", "key": "terms"}
+  ]
+}

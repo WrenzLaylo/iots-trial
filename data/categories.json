@@ -1,0 +1,107 @@
+[
+ {
+  "id": 54,
+  "count": 47,
+  "link": "https://www.insureonthespot.com/category/affordability/",
+  "name": "Affordability",
+  "slug": "affordability"
+ },
+ {
+  "id": 57,
+  "count": 27,
+  "link": "https://www.insureonthespot.com/category/claims/",
+  "name": "Claims",
+  "slug": "claims"
+ },
+ {
+  "id": 53,
+  "count": 121,
+  "link": "https://www.insureonthespot.com/category/coverages/",
+  "name": "Coverages",
+  "slug": "coverages"
+ },
+ {
+  "id": 137,
+  "count": 20,
+  "link": "https://www.insureonthespot.com/category/driving-local-chicago-guide/",
+  "name": "Driving Local: Chicago Guide",
+  "slug": "driving-local-chicago-guide"
+ },
+ {
+  "id": 61,
+  "count": 82,
+  "link": "https://www.insureonthespot.com/category/education/",
+  "name": "Education",
+  "slug": "education"
+ },
+ {
+  "id": 60,
+  "count": 5,
+  "link": "https://www.insureonthespot.com/category/international/",
+  "name": "International",
+  "slug": "international"
+ },
+ {
+  "id": 62,
+  "count": 44,
+  "link": "https://www.insureonthespot.com/category/legal/",
+  "name": "Legal",
+  "slug": "legal"
+ },
+ {
+  "id": 135,
+  "count": 4,
+  "link": "https://www.insureonthespot.com/category/license-registration/",
+  "name": "License &amp; Registration",
+  "slug": "license-registration"
+ },
+ {
+  "id": 59,
+  "count": 56,
+  "link": "https://www.insureonthespot.com/category/maintenance/",
+  "name": "Maintenance",
+  "slug": "maintenance"
+ },
+ {
+  "id": 58,
+  "count": 5,
+  "link": "https://www.insureonthespot.com/category/rentals/",
+  "name": "Rentals",
+  "slug": "rentals"
+ },
+ {
+  "id": 55,
+  "count": 96,
+  "link": "https://www.insureonthespot.com/category/safety/",
+  "name": "Safety",
+  "slug": "safety"
+ },
+ {
+  "id": 63,
+  "count": 23,
+  "link": "https://www.insureonthespot.com/category/sr-22/",
+  "name": "SR-22",
+  "slug": "sr-22"
+ },
+ {
+  "id": 56,
+  "count": 81,
+  "link": "https://www.insureonthespot.com/category/tips/",
+  "name": "Tips",
+  "slug": "tips"
+ },
+ {
+  "id": 1,
+  "count": 51,
+  "link": "https://www.insureonthespot.com/category/uncategorized/",
+  "name": "Uncategorized",
+  "slug": "uncategorized"
+ },
+ {
+  "id": 136,
+  "count": 31,
+  "link": "https://www.insureonthespot.com/category/vehicle-type-guides/",
+  "name": "Vehicle Type Guides",
+  "slug": "vehicle-type-guides"
+ }
+]

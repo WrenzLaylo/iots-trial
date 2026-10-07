@@ -1,0 +1,20 @@
+{% from "_macros.html" import quote_box %}
+<footer class="site-footer">
+  <div class="wrap footer-grid">
+    {% for col in footer %}
+    <div>
+      <h2>{{ col.heading }}</h2>
+      <ul>{% for l in col['items'] %}<li><a href="{{ l.href }}">{{ l.label }}</a></li>{% endfor %}</ul>
+      {% if col.heading == "Services" %}<p class="footer-call"><a href="tel:{{ main_tel }}">Call now {{ main_phone }}</a></p>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="footer-quote">
+      {{ quote_box('footer', heading='h2', compact=True) }}
+      <a class="bbb" href="{{ links.bbb }}"><img src="/assets/img/bbb.png" alt="BBB Accredited Business, view Insure On The Spot on BBB" width="{{ images['bbb.png'][0] }}" height="{{ images['bbb.png'][1] }}" loading="lazy"></a>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <ul>{% for l in legal %}<li><a href="{{ l.href }}">{{ l.label }}</a></li>{% endfor %}</ul>
+    <p>Copyright © 2026 Insure On The Spot. Trusted since 1986.</p>
+  </div>
+</footer>
