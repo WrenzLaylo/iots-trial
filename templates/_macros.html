@@ -27,13 +27,63 @@
 </{{ tag }}>
 {% endmacro %}
 
-{% macro post_card(post, featured=False) %}
-<article class="card post{% if featured %} post-featured{% endif %}">
-  <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
-  <h2 class="post-title"><a href="{{ post.link }}">{{ post.title }}</a></h2>
-  <p>{{ post.excerpt }}</p>
-  <span class="more" aria-hidden="true">Read article {{ icons['caret-right'] | safe }}</span>
+{% macro cover(post, cls='') %}<div class="cover tone-{{ post.tone }} {{ cls }}" aria-hidden="true"><svg class="cover-icon"><use href="#t-{{ post.icon }}"></use></svg><svg class="cover-mark"><use href="#t-{{ post.icon }}"></use></svg></div>{% endmacro %}
+
+{% macro post_card(post, heading='h3') %}
+<article class="card post">
+  {{ cover(post) }}
+  <div class="post-body">
+    <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<span>{{ post.mins }} min read</span></p>
+    <{{ heading }} class="post-title"{% if post.lang %} lang="{{ post.lang }}"{% endif %}><a href="{{ post.link }}">{{ post.title }}</a></{{ heading }}>
+    <p class="excerpt"{% if post.lang %} lang="{{ post.lang }}"{% endif %}>{{ post.excerpt }}</p>
+    <p class="date"><time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
+  </div>
 </article>
+{% endmacro %}
+
+{% macro post_feature(post) %}
+<article class="card post post-featured">
+  {{ cover(post, 'cover-lg') }}
+  <div class="feat-body">
+    <p class="label">Latest guide</p>
+    <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<span>{{ post.mins }} min read</span><span><time datetime="{{ post.date }}">{{ post.date_label }}</time></span></p>
+    <h2 class="post-title"{% if post.lang %} lang="{{ post.lang }}"{% endif %}><a href="{{ post.link }}">{{ post.title }}</a></h2>
+    <p class="excerpt"{% if post.lang %} lang="{{ post.lang }}"{% endif %}>{{ post.excerpt }}</p>
+    <span class="read" aria-hidden="true">Read the guide {{ icons['arrow-right'] | safe }}</span>
+  </div>
+</article>
+{% endmacro %}
+
+{% macro quote_band(id) %}
+<aside class="cta-band" aria-labelledby="cta-h-{{ id }}">
+  <div>
+    <h2 id="cta-h-{{ id }}">Free auto insurance quote in 2 minutes</h2>
+    <p>Lowest rates in Chicagoland. We shop, you save. SR22s filed electronically.</p>
+  </div>
+  <form action="{{ links.quote }}" method="get" data-quote novalidate>
+    <label for="zip-{{ id }}">ZIP code</label>
+    <div class="quote-row">
+      <input id="zip-{{ id }}" name="zipcode" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="10" aria-describedby="zip-err-{{ id }}">
+      <button class="btn btn-cta" type="submit">Get Free Quote</button>
+    </div>
+    <p class="field-error" id="zip-err-{{ id }}" role="alert" hidden></p>
+  </form>
+</aside>
+{% endmacro %}
+
+{% macro hero(items, title, lede, eyebrow=None, photo=None) %}
+<section class="hero{% if photo %} has-photo{% endif %}">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      {{ crumbs(items) }}
+      {% if eyebrow %}<p class="eyebrow">{{ eyebrow }}</p>{% endif %}
+      <h1>{{ title }}</h1>
+      <p class="lede">{{ lede }}</p>
+      {% if caller %}{{ caller() }}{% endif %}
+    </div>
+    {% if photo %}<div class="hero-photo"><img src="{{ photo.src }}" alt="{{ photo.alt }}" width="{{ photo.w }}" height="{{ photo.h }}" fetchpriority="high" style="object-position:{{ photo.pos }}"></div>{% endif %}
+  </div>
+</section>
 {% endmacro %}
 
 {% macro branch_card(b, heading='h3', compact=False) %}

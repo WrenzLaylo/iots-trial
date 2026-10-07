@@ -19,3 +19,14 @@ Browser QA (qa/test_browser.py, 26 checks, all passing):
 Links (qa/check_links.py): 88 checked, all 2xx/3xx except bbb.org (403 to scripts: Cloudflare "Just a moment" bot check; same profile URL their live BBB seal uses, opens normally for a person).
 
 Structured data (validator.schema.org, deployed pages): locations 5 objects, contact 2, blog 3; 0 errors, 0 warnings.
+
+## v2 (editorial), 2026-10-07
+Lighthouse mobile (https://iots-trial.vercel.app): blog 97 / 100 / 100 (perf / a11y / best practices), locations 100 / 100 / 100, contact 100 / 100 / 100. LCP 1.6-1.7 s, CLS 0 to 0.037.
+Browser QA (qa/test_browser.py, 42 checks, all passing): v1 checks plus instant search (results, accents, empty state, did-you-mean, topic fallback, pagination + Back, reload restores, index failure falls back to WordPress search, typing before the script loads, axe on results and empty state at 390px).
+Unit tests: pytest 56, node 22 (search: normalize, matching, ranking, pagination, page numbers, did-you-mean, safe highlighting).
+Structured data (validator.schema.org, deployed): blog 3 objects, locations 5, contact 2; 0 errors, 0 warnings.
+Links: 88 checked; all fine except bbb.org (bot check) and one 429 rate-limit during the bulk run that returns 200 on retry.
+
+## v3 (editorial blog + clean Locations/Contact), 2026-10-07
+Contact hero now has Call and Get Free Quote buttons (PR #10). Lighthouse mobile on the deployed contact page after that change: 99 / 100 / 100, LCP 2.0 s, CLS 0.031.
+Tests: pytest 58, node 25, Playwright 51 (new: the two Contact buttons stack full width on a 390px phone, Call on top, at least 48px tall).

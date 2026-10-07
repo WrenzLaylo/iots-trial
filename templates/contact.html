@@ -8,10 +8,13 @@
       <p class="eyebrow">Chicago's #1 Auto Insurance Agency</p>
       <h1>Contact Us</h1>
       <p class="lede">Call us, stop by one of our 4 Chicagoland offices, or handle it online.</p>
-      <a class="big-phone" href="tel:{{ main_tel }}">{{ icons.phone | safe }}{{ main_phone }}</a>
+      <div class="head-ctas">
+        <a class="btn btn-cta btn-lg" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call {{ main_phone }}</a>
+        <a class="btn btn-outline btn-lg" href="{{ links.quote }}">Get Free Quote</a>
+      </div>
     </div>
     <div class="page-head-photo">
-      <img src="/assets/img/contact-photo.webp" alt="Insure On The Spot agent in a branded shirt holding a toy car" width="{{ images['contact-photo.webp'][0] }}" height="{{ images['contact-photo.webp'][1] }}" fetchpriority="high" style="object-position:50% 25%">
+      <img src="/assets/img/contact-photo.webp" alt="Insure On The Spot team member in a branded shirt holding a toy car" width="{{ images['contact-photo.webp'][0] }}" height="{{ images['contact-photo.webp'][1] }}" fetchpriority="high" style="object-position:50% 25%">
     </div>
   </div>
 </div>

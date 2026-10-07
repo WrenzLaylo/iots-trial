@@ -109,7 +109,8 @@ Severity: **H** hurts calls/quotes or search visibility now, **M** noticeable qu
 
 ### 14. Blog search and topics (M, Fixed)
 - **Evidence:** no search box on the blog. On a 390px phone the "Choose a topic" list sits below all posts and the quote box.
-- **Preview:** topic chips at the top, and a search box that uses their own WordPress search (`/?s=`, verified working).
+- **Preview v1:** topic chips at the top, and a search box that uses their own WordPress search (`/?s=`, verified working).
+- **Preview v2:** results appear as you type across all 594 guides (accent- and typo-tolerant, with a designed empty state); topic chips filter in place; their WordPress search stays as the fallback without JavaScript or if the index fails.
 
 ### 15. Blog pagination (M, Improved)
 - **Evidence:** 4 posts per page, 594 posts = 149 pages, navigation is only "Older Articles" (`/customer-service/blog/page/2/`).
@@ -132,6 +133,7 @@ Severity: **H** hurts calls/quotes or search visibility now, **M** noticeable qu
 ### 19. Español (H, Improved / Recommend)
 - **Evidence:** the "Español" link on every page goes to the single page /espanol/. That page has no link back to English (its top bar still says "Español"), declares `<html lang="en-US">` on Spanish content, and no page has hreflang tags.
 - **Impact:** Spanish speakers lose the page they were on and get stuck; screen readers use English pronunciation; search engines get no language pairing.
+- **Also:** 45 of the 594 posts are in Spanish, mixed into the English blog with no language marking and no Spanish section (e.g. "Seguro de Auto con Pago Inicial Bajo en Chicago..."). The preview marks those cards `lang="es"`.
 - **Preview:** the link is kept and marked `lang="es"` and `hreflang="es"`. No `<link rel="alternate" hreflang>`, because these 3 pages have no Spanish equivalents.
 - **Recommend:** a language switcher on both versions, `lang="es"` on Spanish pages, hreflang pairs wherever a translation exists.
 

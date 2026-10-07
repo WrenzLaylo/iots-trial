@@ -20,6 +20,7 @@ DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 DAY_ABBR = {"mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun"}
 PER_PAGE, BLOG_PAGES = 12, 3
 HIDDEN_CATEGORIES = {"uncategorized"}
+SPANISH_POST_IDS = {12719, 12699}  # Spanish-language posts mixed into the English blog (checked by hand)
 
 
 def fmt_time(hhmm: str) -> str:
@@ -114,23 +115,70 @@ def _write(out: Path, rel: str, content: str) -> Path:
     return path
 
 
-import html as _html
+import gzip
+import math
+import unicodedata
 from datetime import date as _date
 
+SPANISH_WORDS = {"de", "la", "el", "en", "con", "para", "que", "sin", "te", "los", "las", "del", "por", "una", "un", "como",
+                 "seguro", "si", "tu", "es", "se", "al", "mas", "cuando", "donde", "lo"}
+ENGLISH_WORDS = {"the", "and", "for", "you", "your", "what", "how", "to", "of", "in", "is", "with", "do", "does", "car", "insurance"}
 
-def _post_view(p, cats):
-    d = _date.fromisoformat(p["date"])
-    topic = next((cats[c]["name"] for c in p["categories"] if c in cats and cats[c]["slug"] not in HIDDEN_CATEGORIES), "")
-    return {"title": _html.unescape(p["title"]), "link": p["link"], "date": p["date"],
-            "date_label": f"{d:%B} {d.day}, {d.year}", "topic": _html.unescape(topic),
-            "excerpt": clean_excerpt(p["excerpt_html"])}
+
+def is_spanish(title: str) -> bool:
+    """Spanish-language posts are mixed into the English blog (45 of 594 on 2026-10-07)."""
+    words = re.findall(r"[a-z]+", unicodedata.normalize("NFD", title).encode("ascii", "ignore").decode().lower())
+    es, en = sum(w in SPANISH_WORDS for w in words), sum(w in ENGLISH_WORDS for w in words)
+    return (("¿" in title or "ñ" in title or es >= 3) and es > en) or False
+
+
+def reading_minutes(words: int) -> int:
+    return max(1, math.ceil(words / 230))
+
+
+def _topics_table():
+    art = _json("topics.json")
+    cats = sorted((c for c in _json("categories.json") if c["slug"] not in HIDDEN_CATEGORIES), key=lambda c: c["name"])
+    return [{"id": c["id"], "name": html.unescape(c["name"]), "slug": c["slug"], "link": c["link"],
+             "icon": art[c["slug"]]["icon"], "tone": art[c["slug"]]["tone"]} for c in cats]
+
+
+def load_posts():
+    topics = _topics_table()
+    by_id = {t["id"]: i for i, t in enumerate(topics)}
+    out = []
+    for p in _json("posts_index.json"):
+        tis = [by_id[c] for c in p["cats"] if c in by_id]
+        ti = tis[0] if tis else -1
+        t = topics[ti] if ti >= 0 else {"name": "", "slug": "", "icon": "newspaper", "tone": "pale"}
+        title = html.unescape(p["title"])
+        d = _date.fromisoformat(p["date"])
+        out.append({"id": p["id"], "title": title, "link": p["link"], "date": p["date"],
+                    "date_label": f"{d:%b} {d.day}, {d.year}", "topic": t["name"], "topic_slug": t["slug"],
+                    "icon": t["icon"], "tone": t["tone"], "ti": ti, "tis": tis, "mins": reading_minutes(p["words"]),
+                    "excerpt": clean_excerpt(p["excerpt_html"], 150), "short": clean_excerpt(p["excerpt_html"], 110),
+                    "lang": "es" if (p["id"] in SPANISH_POST_IDS or is_spanish(title)) else None})
+    return topics, out
+
+
+def search_index(topics, posts) -> dict:
+    return {"base": PROD, "count": len(posts),
+            "topics": [{k: t[k] for k in ("name", "slug", "icon", "tone", "link")} for t in topics],
+            "posts": [[p["title"], p["link"][len(PROD):], p["date"], p["tis"], p["mins"], p["short"], p["lang"] or ""] for p in posts]}
+
+
+def icon_sprite(names) -> str:
+    symbols = []
+    for n in sorted(set(names)):
+        body = (STATIC / "icons" / f"{n}.svg").read_text(encoding="utf-8")
+        inner = body[body.index(">") + 1: body.rindex("</svg>")]
+        symbols.append(f'<symbol id="t-{n}" viewBox="0 0 256 256">{inner}</symbol>')
+    return '<svg class="sprite" aria-hidden="true" focusable="false">' + "".join(symbols) + "</svg>"
 
 
 def blog_pages(ctx):
-    cats = {c["id"]: c for c in _json("categories.json")}
-    chips = [{"name": _html.unescape(c["name"]), "link": c["link"]}
-             for c in sorted(cats.values(), key=lambda c: c["name"]) if c["slug"] not in HIDDEN_CATEGORIES]
-    posts = [_post_view(p, cats) for p in _json("posts.json")]
+    topics, posts = load_posts()
+    sprite = icon_sprite([t["icon"] for t in topics] + ["newspaper", "chat-circle-text"])
     out = []
     for n, chunk in enumerate(paginate(posts, PER_PAGE, BLOG_PAGES), start=1):
         rel = "customer-service/blog" + ("" if n == 1 else f"/page/{n}")
@@ -141,14 +189,16 @@ def blog_pages(ctx):
         if n > 1:
             desc = f"Page {n} of our car insurance tips for Chicago drivers: claims, coverage, SR-22, safety and more."
         crumbs = [("Home", ctx["links"]["home"]), ("Tips & Resources", "/customer-service/blog/")]
+        if n > 1:
+            crumbs.append((f"Page {n}", f"/{rel}/"))
+        cards = chunk[1:] if n == 1 else chunk
         out.append(("blog.html", rel, {
-            "slug": "blog", "path": "/customer-service/blog/", "title": title, "description": desc,
-            "crumbs": crumbs + ([(f"Page {n}", f"/{rel}/")] if n > 1 else []),
+            "slug": "blog", "path": "/customer-service/blog/", "title": title, "description": desc, "crumbs": crumbs,
             "jsonld": [jsonld.blog_collection(url, chunk),
-                       jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Tips & Resources", f"{PROD}/customer-service/blog/")])],
-            "extra": {"posts": chunk[1:] if n == 1 else chunk, "featured": chunk[0] if n == 1 else None,
-                      "chips": chips, "page_no": n, "page_count": BLOG_PAGES,
-                      "older_url": ctx["links"]["blog_older"]},
+                       jsonld.breadcrumbs([(c[0], c[1] if c[1].startswith("http") else PROD + c[1]) for c in crumbs])],
+            "extra": {"featured": chunk[0] if n == 1 else None, "first": cards[:6], "rest": cards[6:],
+                      "topics": topics, "post_count": len(posts), "page_no": n, "page_count": BLOG_PAGES,
+                      "older_url": ctx["links"]["blog_older"], "sprite": sprite},
         }))
     return out
 
@@ -195,6 +245,10 @@ def render_all(out: Path = OUT) -> list[Path]:
     ctx, env = load_context(), _env()
     env.globals.update(ctx)  # globals (not render kwargs) so macros imported from _macros.html can see them
     written = []
+    topics, posts = load_posts()
+    data_dir = out / "assets" / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "posts-index.json").write_text(json.dumps(search_index(topics, posts), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for template, rel, page in pages(ctx):
         extra = page.pop("extra", {})
         html_out = env.get_template(template).render(**extra, page=page)
