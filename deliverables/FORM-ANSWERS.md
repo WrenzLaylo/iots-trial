@@ -2,17 +2,17 @@
 
 ## Video walkthrough (Loom or similar)
 Option A (recommended): record a short Loom with your voice, using the script at the bottom of this file, while clicking through https://iots-trial.vercel.app.
-Option B: upload `deliverables/walkthrough-v2.mp4` (1:25, captioned, no voice) to Loom ("Upload a video") or to Google Drive (share: anyone with the link), and paste that link.
+Option B: upload `deliverables/walkthrough-v3.mp4` (1:25, captioned, no voice) to Loom ("Upload a video") or to Google Drive (share: anyone with the link), and paste that link.
 
 ## Repository or files
 Pending your choice (see chat): make https://github.com/WrenzLaylo/iots-trial public, or leave it private and rely on the uploaded zip.
 
 ## Live demo
-https://iots-trial.vercel.app
+https://iots-trial.vercel.app (v3: editorial blog with instant search, clean Locations and Contact)
 (v1, closer to the current design: https://iots-trial-classic.vercel.app)
 
 ## Upload a file
-`deliverables/IOTS-trial-v2-Wrenz-Laylo.zip` (10.4 MB: note, 26-item audit, QA results, desktop + phone screenshots, walkthrough video)
+`deliverables/IOTS-trial-v3-Wrenz-Laylo.zip` (10.3 MB: note, 26-item audit, QA results, desktop + phone screenshots, walkthrough video)
 If you send v1 instead: `deliverables/IOTS-trial-v1-Wrenz-Laylo.zip` (4.3 MB)
 
 ## Your approach
@@ -23,8 +23,8 @@ I focused first on what costs calls and search visibility: tap-to-call and visib
 I kept their brand, content and URLs, used only real data from their site, and tested in three browsers with accessibility, keyboard, JavaScript-off and slow-network checks. I worked in Git with a pull request per page.
 
 ## Anything else
-Time: about 7 hours, including a second design pass after reviewing my first version.
-Two versions: v2 (editorial, instant search) is the one I'd ship. v1 is a lighter touch on the current design: https://iots-trial-classic.vercel.app
+Time: about 8 hours, including two design passes after reviewing my own first versions.
+Versions: the live demo combines an editorial blog (instant search, topic cover art) with clean, quiet Locations and Contact pages. A lighter-touch version closer to the current design is at https://iots-trial-classic.vercel.app
 Open questions: Should Contact have a form, and who would answer it? 45 of the 594 posts are in Spanish, mixed into the English blog; together with the Español link that has no way back, it may be worth a proper Spanish section.
 Caveats: the preview is noindexed on purpose and has none of your marketing tags (part of the Lighthouse gap). Open/closed labels don't know holiday dates, so cards say "Holiday hours may vary". I used Figtree because Proxima Nova is licensed to your domain.
 Also noticed (outside the 3 pages): two Google Tag Manager containers load on every page; the Snapchat pixel sends a literal placeholder instead of an email; the quote button goes through http:// and the redirect duplicates the ZIP; the blog hasn't published since July 5.
