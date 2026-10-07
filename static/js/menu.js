@@ -9,6 +9,7 @@ export function initMenu() {
     button.querySelector('[data-icon-open]').hidden = open;
     button.querySelector('[data-icon-close]').hidden = !open;
     panel.hidden = !open;
+    panel.classList.toggle('is-open', open);
   };
   button.addEventListener('click', () => {
     const open = button.getAttribute('aria-expanded') !== 'true';

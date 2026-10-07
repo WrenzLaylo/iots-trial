@@ -22,7 +22,11 @@ IMAGES = {
 }
 ICONS = ["phone", "navigation-arrow", "clock", "storefront", "car", "list", "x", "magnifying-glass",
          "credit-card", "arrows-clockwise", "file-text", "truck", "question", "star", "briefcase",
-         "gift", "map-pin", "caret-right"]
+         "gift", "map-pin", "caret-right",
+         # v2 topic cover art + search UI
+         "piggy-bank", "umbrella", "map-trifold", "graduation-cap", "globe-hemisphere-west", "scales",
+         "identification-card", "wrench", "key", "shield-check", "seal-check", "lightbulb", "car-profile",
+         "newspaper", "arrow-right", "arrow-left", "magnifying-glass-minus", "chat-circle-text"]
 LEAFLET = "https://unpkg.com/leaflet@1.9.4/dist"
 LEAFLET_FILES = ["leaflet.js", "leaflet.css", "images/marker-icon.png", "images/marker-icon-2x.png", "images/marker-shadow.png"]
 
@@ -86,4 +90,8 @@ def leaflet():
 
 
 if __name__ == "__main__":
-    images(); font(); icons(); leaflet()
+    import sys
+    if "--icons-only" in sys.argv:
+        icons()
+    else:
+        images(); font(); icons(); leaflet()

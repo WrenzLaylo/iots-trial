@@ -20,6 +20,7 @@ DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 DAY_ABBR = {"mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun"}
 PER_PAGE, BLOG_PAGES = 12, 3
 HIDDEN_CATEGORIES = {"uncategorized"}
+SPANISH_POST_IDS = {12719, 12699}  # Spanish-language posts mixed into the English blog (checked by hand)
 
 
 def fmt_time(hhmm: str) -> str:
@@ -114,11 +115,126 @@ def _write(out: Path, rel: str, content: str) -> Path:
     return path
 
 
+import gzip
+import math
+import unicodedata
+from datetime import date as _date
+
+SPANISH_WORDS = {"de", "la", "el", "en", "con", "para", "que", "sin", "te", "los", "las", "del", "por", "una", "un", "como",
+                 "seguro", "si", "tu", "es", "se", "al", "mas", "cuando", "donde", "lo"}
+ENGLISH_WORDS = {"the", "and", "for", "you", "your", "what", "how", "to", "of", "in", "is", "with", "do", "does", "car", "insurance"}
+
+
+def is_spanish(title: str) -> bool:
+    """Spanish-language posts are mixed into the English blog (45 of 594 on 2026-10-07)."""
+    words = re.findall(r"[a-z]+", unicodedata.normalize("NFD", title).encode("ascii", "ignore").decode().lower())
+    es, en = sum(w in SPANISH_WORDS for w in words), sum(w in ENGLISH_WORDS for w in words)
+    return (("¿" in title or "ñ" in title or es >= 3) and es > en) or False
+
+
+def reading_minutes(words: int) -> int:
+    return max(1, math.ceil(words / 230))
+
+
+def _topics_table():
+    art = _json("topics.json")
+    cats = sorted((c for c in _json("categories.json") if c["slug"] not in HIDDEN_CATEGORIES), key=lambda c: c["name"])
+    return [{"id": c["id"], "name": html.unescape(c["name"]), "slug": c["slug"], "link": c["link"],
+             "icon": art[c["slug"]]["icon"], "tone": art[c["slug"]]["tone"]} for c in cats]
+
+
+def load_posts():
+    topics = _topics_table()
+    by_id = {t["id"]: i for i, t in enumerate(topics)}
+    out = []
+    for p in _json("posts_index.json"):
+        tis = [by_id[c] for c in p["cats"] if c in by_id]
+        ti = tis[0] if tis else -1
+        t = topics[ti] if ti >= 0 else {"name": "", "slug": "", "icon": "newspaper", "tone": "pale"}
+        title = html.unescape(p["title"])
+        d = _date.fromisoformat(p["date"])
+        out.append({"id": p["id"], "title": title, "link": p["link"], "date": p["date"],
+                    "date_label": f"{d:%b} {d.day}, {d.year}", "topic": t["name"], "topic_slug": t["slug"],
+                    "icon": t["icon"], "tone": t["tone"], "ti": ti, "tis": tis, "mins": reading_minutes(p["words"]),
+                    "excerpt": clean_excerpt(p["excerpt_html"], 150), "short": clean_excerpt(p["excerpt_html"], 110),
+                    "lang": "es" if (p["id"] in SPANISH_POST_IDS or is_spanish(title)) else None})
+    return topics, out
+
+
+def search_index(topics, posts) -> dict:
+    return {"base": PROD, "count": len(posts),
+            "topics": [{k: t[k] for k in ("name", "slug", "icon", "tone", "link")} for t in topics],
+            "posts": [[p["title"], p["link"][len(PROD):], p["date"], p["tis"], p["mins"], p["short"], p["lang"] or ""] for p in posts]}
+
+
+def icon_sprite(names) -> str:
+    symbols = []
+    for n in sorted(set(names)):
+        body = (STATIC / "icons" / f"{n}.svg").read_text(encoding="utf-8")
+        inner = body[body.index(">") + 1: body.rindex("</svg>")]
+        symbols.append(f'<symbol id="t-{n}" viewBox="0 0 256 256">{inner}</symbol>')
+    return '<svg class="sprite" aria-hidden="true" focusable="false">' + "".join(symbols) + "</svg>"
+
+
+def blog_pages(ctx):
+    topics, posts = load_posts()
+    sprite = icon_sprite([t["icon"] for t in topics] + ["newspaper", "chat-circle-text"])
+    out = []
+    for n, chunk in enumerate(paginate(posts, PER_PAGE, BLOG_PAGES), start=1):
+        rel = "customer-service/blog" + ("" if n == 1 else f"/page/{n}")
+        url = f"{PROD}/{rel}/"
+        title = ("Car Insurance Tips for Chicago Drivers" if n == 1 else f"Car Insurance Tips, Page {n}") + " | Insure On The Spot"
+        desc = ("Car insurance tips for Chicago drivers from Insure On The Spot: claims, coverage, SR-22, "
+                "safety, maintenance and getting around Chicagoland.")
+        if n > 1:
+            desc = f"Page {n} of our car insurance tips for Chicago drivers: claims, coverage, SR-22, safety and more."
+        crumbs = [("Home", ctx["links"]["home"]), ("Tips & Resources", "/customer-service/blog/")]
+        if n > 1:
+            crumbs.append((f"Page {n}", f"/{rel}/"))
+        cards = chunk[1:] if n == 1 else chunk
+        out.append(("blog.html", rel, {
+            "slug": "blog", "path": "/customer-service/blog/", "title": title, "description": desc, "crumbs": crumbs,
+            "jsonld": [jsonld.blog_collection(url, chunk),
+                       jsonld.breadcrumbs([(c[0], c[1] if c[1].startswith("http") else PROD + c[1]) for c in crumbs])],
+            "extra": {"featured": chunk[0] if n == 1 else None, "first": cards[:6], "rest": cards[6:],
+                      "topics": topics, "post_count": len(posts), "page_no": n, "page_count": BLOG_PAGES,
+                      "older_url": ctx["links"]["blog_older"], "sprite": sprite},
+        }))
+    return out
+
+
+def locations_page(ctx):
+    points = [{"name": b["name"], "address": f"{b['street']}, {b['city']}, {b['state']} {b['zip']}",
+               "phone": b["phone"], "tel": b["tel"], "lat": b["lat"], "lng": b["lng"]} for b in ctx["branches"]]
+    return ("locations.html", "locations", {
+        "slug": "locations", "path": "/locations/",
+        "title": "Chicago, Berwyn & Melrose Park Offices | Insure On The Spot",
+        "description": ("Visit Insure On The Spot in Chicago (N Elston Ave and S Cicero Ave), Berwyn and Melrose Park. "
+                        "Hours, phone numbers, directions and free parking."),
+        "crumbs": [("Home", ctx["links"]["home"]), ("Locations", "/locations/")],
+        "jsonld": [jsonld.organization()] + [jsonld.agency(b) for b in ctx["branches"]] +
+                  [jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Locations", f"{PROD}/locations/")])],
+        "extra": {"points": points},
+    })
+
+
+def contact_page(ctx):
+    return ("contact.html", "contact", {
+        "slug": "contact", "path": "/contact/",
+        "title": "Contact Insure On The Spot | Call 773-202-5060",
+        "description": ("Call Insure On The Spot at 773-202-5060 or visit one of 4 Chicagoland offices. "
+                        "Customer service and sales hours, payments, claims and free quotes."),
+        "crumbs": [("Home", ctx["links"]["home"]), ("Contact Us", "/contact/")],
+        "jsonld": [jsonld.contact_page(),
+                   jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Contact Us", f"{PROD}/contact/")])],
+    })
+
+
 def pages(ctx: dict) -> list[tuple[str, str, dict]]:
-    """(template, output dir relative to site/, page dict). Extended by Tasks 4-6."""
-    return [("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
-                                "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
-                                "jsonld": [], "crumbs": []})]
+    home = ("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
+                               "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
+                               "jsonld": [], "crumbs": []})
+    return [home] + blog_pages(ctx) + [locations_page(ctx), contact_page(ctx)]
 
 
 def render_all(out: Path = OUT) -> list[Path]:
@@ -129,6 +245,10 @@ def render_all(out: Path = OUT) -> list[Path]:
     ctx, env = load_context(), _env()
     env.globals.update(ctx)  # globals (not render kwargs) so macros imported from _macros.html can see them
     written = []
+    topics, posts = load_posts()
+    data_dir = out / "assets" / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    (data_dir / "posts-index.json").write_text(json.dumps(search_index(topics, posts), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     for template, rel, page in pages(ctx):
         extra = page.pop("extra", {})
         html_out = env.get_template(template).render(**extra, page=page)
