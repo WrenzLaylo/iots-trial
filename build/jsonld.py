@@ -6,7 +6,7 @@ DAY_SCHEMA = {"mon": "Monday", "tue": "Tuesday", "wed": "Wednesday", "thu": "Thu
 
 
 def organization():
-    return {"@context": "https://schema.org", "@type": "InsuranceAgency", "@id": ORG_ID,
+    return {"@context": "https://schema.org", "@type": "Organization", "@id": ORG_ID,
             "name": "Insure On The Spot", "url": f"{PROD}/", "telephone": "+1-773-202-5060",
             "logo": f"{PROD}/wp-content/themes/orbit-media/images/logo.png", "foundingDate": "1986"}
 
@@ -46,7 +46,7 @@ def blog_collection(url, posts):
 def contact_page():
     return {"@context": "https://schema.org", "@type": "ContactPage", "url": f"{PROD}/contact/",
             "about": {"@id": ORG_ID},
-            "mainEntity": {"@id": ORG_ID, "@type": "InsuranceAgency", "name": "Insure On The Spot",
+            "mainEntity": {"@id": ORG_ID, "@type": "Organization", "name": "Insure On The Spot",
                            "contactPoint": [{"@type": "ContactPoint", "telephone": "+1-773-202-5060",
                                              "contactType": "customer service", "areaServed": "US-IL",
                                              "availableLanguage": ["English", "Spanish"]}]}}
