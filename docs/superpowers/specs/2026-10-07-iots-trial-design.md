@@ -11,6 +11,7 @@ Rebuild three pages of insureonthespot.com (blog landing, locations, contact) as
 3. Short note (aim for under 200 words): what was tested, 2-3 improvements and why, tools used. Plus one line on the Español finding and the contact-form question. Wrenz rewrites it in his own voice.
 
 ## Findings that drive the work (all verified on the live site 2026-10-07)
+Full list of 26 findings with evidence, severity and status: `docs/FINDINGS.md`. Key ones:
 - WordPress (theme `orbit-media`, WP Store Locator, Ninja Forms); REST API open (594 posts, 15 categories, 4 stores).
 - No meta description on any of the 3 pages.
 - Blog: H1 is the latest post's title; "Uncategorized" (51 posts) shown to visitors; no search box; 4 posts per page with only "Older Articles"; no new post since 2026-07-05 (3 months).
