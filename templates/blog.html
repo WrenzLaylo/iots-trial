@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% from "_macros.html" import quote_box, crumbs, post_card %}
+{% block main %}
+<div class="page-head">
+  <div class="wrap section">
+    {{ crumbs(page.crumbs) }}
+    <h1>Tips &amp; Resources</h1>
+    <p class="lede">Practical car insurance advice for Chicago drivers: claims, coverage, SR-22s, safety and keeping your car on the road.</p>
+  </div>
+</div>
+<div class="wrap section blog-layout">
+  <div>
+    <div class="blog-tools">
+      <form class="search" role="search" action="{{ links.search }}" method="get">
+        <label class="visually-hidden" for="blog-search">Search articles</label>
+        <input id="blog-search" name="s" type="search" placeholder="Search articles">
+        <button class="btn btn-primary" type="submit">{{ icons['magnifying-glass'] | safe }}Search</button>
+      </form>
+      <nav aria-label="Topics"><ul class="chips">{% for c in chips %}<li><a data-chip href="{{ c.link }}">{{ c.name }}</a></li>{% endfor %}</ul></nav>
+    </div>
+    <ul class="post-grid">
+      {% if featured %}<li class="post-featured-item">{{ post_card(featured, True) }}</li>{% endif %}
+      {% for post in posts %}
+      <li{% if loop.last and posts|length is odd %} class="post-featured-item"{% endif %}>{{ post_card(post) }}</li>
+      {% if loop.index == (2 if featured else 3) %}<li class="quote-inline">{{ quote_box('inline', heading='h2') }}</li>{% endif %}
+      {% endfor %}
+    </ul>
+    <nav aria-label="Article pages">
+      <ul class="pagination">
+        {% for n in range(1, page_count + 1) %}
+        <li>{% if n == page_no %}<span aria-current="page">{{ n }}</span>{% else %}<a href="/customer-service/blog/{% if n > 1 %}page/{{ n }}/{% endif %}">{{ n }}</a>{% endif %}</li>
+        {% endfor %}
+        {% if page_no < page_count %}<li><a href="/customer-service/blog/page/{{ page_no + 1 }}/">Next {{ icons['caret-right'] | safe }}</a></li>
+        {% else %}<li><a href="{{ older_url }}">Older articles {{ icons['caret-right'] | safe }}</a></li>{% endif %}
+      </ul>
+    </nav>
+  </div>
+  <aside class="blog-side" aria-label="Get help">
+    {{ quote_box('side', heading='h2') }}
+    <section class="card" aria-labelledby="help-h">
+      <h2 id="help-h">Need help?</h2>
+      <ul class="help-list">
+        <li><a href="{{ links.payment_options }}">{{ icons['credit-card'] | safe }}Payment options</a></li>
+        <li><a href="{{ links.roadside }}">{{ icons.truck | safe }}Roadside assistance</a></li>
+        <li><a href="{{ links.claim }}">{{ icons['file-text'] | safe }}Report an auto insurance claim</a></li>
+        <li><a href="{{ links.faq }}">{{ icons.question | safe }}Auto insurance FAQs</a></li>
+      </ul>
+    </section>
+  </aside>
+</div>
+{% endblock %}

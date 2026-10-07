@@ -114,11 +114,50 @@ def _write(out: Path, rel: str, content: str) -> Path:
     return path
 
 
+import html as _html
+from datetime import date as _date
+
+
+def _post_view(p, cats):
+    d = _date.fromisoformat(p["date"])
+    topic = next((cats[c]["name"] for c in p["categories"] if c in cats and cats[c]["slug"] not in HIDDEN_CATEGORIES), "")
+    return {"title": _html.unescape(p["title"]), "link": p["link"], "date": p["date"],
+            "date_label": f"{d:%B} {d.day}, {d.year}", "topic": _html.unescape(topic),
+            "excerpt": clean_excerpt(p["excerpt_html"])}
+
+
+def blog_pages(ctx):
+    cats = {c["id"]: c for c in _json("categories.json")}
+    chips = [{"name": _html.unescape(c["name"]), "link": c["link"]}
+             for c in sorted(cats.values(), key=lambda c: c["name"]) if c["slug"] not in HIDDEN_CATEGORIES]
+    posts = [_post_view(p, cats) for p in _json("posts.json")]
+    out = []
+    for n, chunk in enumerate(paginate(posts, PER_PAGE, BLOG_PAGES), start=1):
+        rel = "customer-service/blog" + ("" if n == 1 else f"/page/{n}")
+        url = f"{PROD}/{rel}/"
+        title = ("Car Insurance Tips for Chicago Drivers" if n == 1 else f"Car Insurance Tips, Page {n}") + " | Insure On The Spot"
+        desc = ("Car insurance tips for Chicago drivers from Insure On The Spot: claims, coverage, SR-22, "
+                "safety, maintenance and getting around Chicagoland.")
+        if n > 1:
+            desc = f"Page {n} of our car insurance tips for Chicago drivers: claims, coverage, SR-22, safety and more."
+        crumbs = [("Home", ctx["links"]["home"]), ("Tips & Resources", "/customer-service/blog/")]
+        out.append(("blog.html", rel, {
+            "slug": "blog", "path": "/customer-service/blog/", "title": title, "description": desc,
+            "crumbs": crumbs + ([(f"Page {n}", f"/{rel}/")] if n > 1 else []),
+            "jsonld": [jsonld.blog_collection(url, chunk),
+                       jsonld.breadcrumbs([("Home", f"{PROD}/"), ("Tips & Resources", f"{PROD}/customer-service/blog/")])],
+            "extra": {"posts": chunk[1:] if n == 1 else chunk, "featured": chunk[0] if n == 1 else None,
+                      "chips": chips, "page_no": n, "page_count": BLOG_PAGES,
+                      "older_url": ctx["links"]["blog_older"]},
+        }))
+    return out
+
+
 def pages(ctx: dict) -> list[tuple[str, str, dict]]:
-    """(template, output dir relative to site/, page dict). Extended by Tasks 4-6."""
-    return [("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
-                                "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
-                                "jsonld": [], "crumbs": []})]
+    home = ("index.html", "", {"slug": "home", "path": "/", "title": "Insure On The Spot preview: 3 rebuilt pages",
+                               "description": "Trial task preview for Vela: rebuilt blog, locations and contact pages for Insure On The Spot, with an audit of what was fixed and why.",
+                               "jsonld": [], "crumbs": []})
+    return [home] + blog_pages(ctx)
 
 
 def render_all(out: Path = OUT) -> list[Path]:
