@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { normalize, tokens, buildIndex, searchPosts, paginate, pageNumbers, suggest, vocabulary, highlight } from '../../static/js/search.js';
+import { normalize, tokens, meaningfulTokens, buildIndex, searchPosts, paginate, pageNumbers, suggest, vocabulary, highlight } from '../../static/js/search.js';
 
 const RAW = {
   topics: [{ name: 'SR-22', slug: 'sr-22' }, { name: 'Coverages', slug: 'coverages' }, { name: 'Legal', slug: 'legal' }],
@@ -75,7 +75,7 @@ test('suggest fixes a typo from real title words', () => {
 test('highlight wraps matches, keeps accents and escapes HTML', () => {
   assert.equal(highlight('Qué Pasa Si', 'que'), '<mark>Qué</mark> Pasa Si');
   assert.equal(highlight('Need SR-22 Insurance', 'sr22'), 'Need <mark>SR-22</mark> Insurance');
-  assert.equal(highlight('<b>Fish & Chips</b>', 'fish'), '&lt;b&gt;<mark>Fish</mark> &amp; Chips&lt;/b&gt;');
+  assert.equal(highlight('Fish & Chips <b>x</b>', 'fish'), '<mark>Fish</mark> &amp; Chips &lt;b&gt;x&lt;/b&gt;');
   assert.equal(highlight('Plain title', ''), 'Plain title');
 });
 
@@ -87,4 +87,29 @@ test("topic filter matches any of a post's topics, cover uses the first", () => 
   assert.equal(multi[0].topic, 'Safety');
   assert.equal(searchPosts(multi, { topic: 'Coverages' }).length, 1);
   assert.equal(searchPosts(multi, { topic: 'Safety' }).length, 1);
+});
+
+const noisy = buildIndex({
+  topics: [{ name: 'Tips', slug: 'tips' }],
+  posts: [
+    ['Parking Etiquette Downtown', 'https://x/a', '2026-01-02', 0, 4, 'Be kind.', ''],
+    ['Qué Hacer Después de un Choque', 'https://x/b', '2026-01-01', 0, 6, 'Pasos.', ''],
+    ['Winters in Chicago', 'https://x/c', '2026-01-03', 0, 5, 'Cold.', ''],
+  ],
+});
+
+test('words match at word starts only', () => {
+  assert.deepEqual(searchPosts(noisy, { q: 'que' }).map((p) => p.link), ['https://x/b']);
+  assert.equal(highlight('Parking Etiquette Downtown', 'que'), 'Parking Etiquette Downtown');
+});
+
+test('meaningfulTokens ignores 1-character words and punctuation', () => {
+  assert.deepEqual(meaningfulTokens('a'), []);
+  assert.deepEqual(meaningfulTokens('!@#$'), []);
+  assert.deepEqual(meaningfulTokens('sr 22 a'), ['sr', '22']);
+  assert.equal(searchPosts(noisy, { q: 'a' }).length, 3); // nothing meaningful typed yet: no filtering
+});
+
+test('suggest does not jump to an unrelated word', () => {
+  assert.equal(suggest('renters', vocabulary(noisy)), null);
 });

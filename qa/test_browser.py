@@ -362,3 +362,55 @@ def test_typing_before_search_script_loads(pw, base):
     page.fill("#blog-q", "sr22")  # typed before blog.js has loaded
     page.wait_for_function("(document.getElementById('results-h') || {}).textContent?.includes('sr22')", timeout=10000)
     browser.close()
+
+
+@pytest.mark.parametrize("width", [320, 390])
+def test_long_query_does_not_overflow(pw, base, width):
+    browser, page, _ = _blog(pw, base, BLOG + "?q=" + "a" * 60, width=width)
+    page.wait_for_selector("#results-h")
+    assert page.evaluate("document.documentElement.scrollWidth - window.innerWidth") <= 0
+    browser.close()
+
+
+def test_focus_after_all_topics_suggestion(pw, base):
+    browser, page, _ = _blog(pw, base)
+    page.locator('.chip[data-topic="Rentals"]').click()
+    page.wait_for_selector("#results-h")
+    page.fill("#blog-q", "dui")
+    btn = page.locator(".empty .suggestion", has_text="all topics")
+    btn.wait_for()
+    btn.focus()
+    page.keyboard.press("Enter")
+    page.wait_for_selector("#search-results article.post")
+    assert page.evaluate("document.activeElement.id") == "results-h"
+    browser.close()
+
+
+def test_clearing_while_index_loads_leaves_nothing_stale(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page()
+    # delay the index inside the browser (a sleeping route handler would also pause this test)
+    page.add_init_script("""(() => { const f = window.fetch; window.fetch = (u, o) => String(u).includes('posts-index')
+        ? new Promise((r) => setTimeout(() => r(f(u, o)), 1500)) : f(u, o); })();""")
+    page.goto(base + BLOG, wait_until="load")
+    page.wait_for_selector("[data-blog-search][data-ready]", state="attached")
+    page.fill("#blog-q", "sr22")
+    page.wait_for_timeout(200)
+    page.press("#blog-q", "Escape")
+    page.wait_for_timeout(2500)
+    assert page.locator("#search-results").is_hidden()
+    assert page.inner_text("#search-status") == ""
+    browser.close()
+
+
+def test_hanging_index_times_out_to_wordpress_search(pw, base):
+    browser = pw.chromium.launch()
+    page = browser.new_page()
+    page.add_init_script("""window.IOTS_INDEX_TIMEOUT_MS = 600; (() => { const f = window.fetch;
+        window.fetch = (u, o) => String(u).includes('posts-index') ? new Promise(() => {}) : f(u, o); })();""")
+    page.goto(base + BLOG, wait_until="load")
+    page.wait_for_selector("[data-blog-search][data-ready]", state="attached")
+    page.fill("#blog-q", "sr22")
+    page.wait_for_selector(".notice", timeout=5000)
+    assert page.locator('.notice a[href="https://www.insureonthespot.com/?s=sr22"]').count() == 1
+    browser.close()

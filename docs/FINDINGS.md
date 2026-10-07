@@ -109,7 +109,8 @@ Severity: **H** hurts calls/quotes or search visibility now, **M** noticeable qu
 
 ### 14. Blog search and topics (M, Fixed)
 - **Evidence:** no search box on the blog. On a 390px phone the "Choose a topic" list sits below all posts and the quote box.
-- **Preview:** topic chips at the top, and a search box that uses their own WordPress search (`/?s=`, verified working).
+- **Preview v1:** topic chips at the top, and a search box that uses their own WordPress search (`/?s=`, verified working).
+- **Preview v2:** results appear as you type across all 594 guides (accent- and typo-tolerant, with a designed empty state); topic chips filter in place; their WordPress search stays as the fallback without JavaScript or if the index fails.
 
 ### 15. Blog pagination (M, Improved)
 - **Evidence:** 4 posts per page, 594 posts = 149 pages, navigation is only "Older Articles" (`/customer-service/blog/page/2/`).

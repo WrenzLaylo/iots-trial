@@ -11,6 +11,12 @@ export function tokens(q) {
   return n ? n.split(' ') : [];
 }
 
+export function meaningfulTokens(q) {
+  return tokens(q).filter((t) => t.length >= 2); // a single letter would match nearly everything
+}
+
+const atWordStart = (text, t) => (` ${text}`).includes(` ${t}`);
+
 export function buildIndex(raw) {
   return raw.posts.map(([title, link, date, ti, mins, excerpt, lang]) => {
     const all = (Array.isArray(ti) ? ti : [ti]).map((i) => raw.topics[i]).filter(Boolean);
@@ -26,12 +32,12 @@ export function buildIndex(raw) {
 }
 
 export function searchPosts(items, { q = '', topic = '' } = {}) {
-  const toks = tokens(q);
+  const toks = meaningfulTokens(q);
   const hits = [];
   for (const it of items) {
     if (topic && !it.topics.includes(topic)) continue;
-    if (!toks.every((t) => it.hay.includes(t))) continue;
-    hits.push({ it, score: toks.filter((t) => it.titleNorm.includes(t)).length });
+    if (!toks.every((t) => atWordStart(it.hay, t))) continue;
+    hits.push({ it, score: toks.filter((t) => atWordStart(it.titleNorm, t)).length });
   }
   hits.sort((a, b) => b.score - a.score || (a.it.date < b.it.date ? 1 : a.it.date > b.it.date ? -1 : 0));
   return hits.map((h) => h.it);
@@ -92,11 +98,12 @@ export function suggest(q, vocab) {
   let changed = false;
   const fixed = tokens(q).map((t) => {
     if (t.length < 4 || vocab.has(t)) return t;
-    const max = t.length <= 5 ? 1 : 2;
+    const max = t.length <= 7 ? 1 : 2; // so 'renters' does not become 'winters'
     let best = null;
     let bestD = max + 1;
     let bestCount = 0;
     for (const [w, count] of vocab) {
+      if (w[0] !== t[0]) continue; // typos rarely change the first letter
       const d = distance(t, w, max);
       if (d < bestD || (d === bestD && d <= max && count > bestCount)) { best = w; bestD = d; bestCount = count; }
     }
@@ -110,7 +117,7 @@ const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;
 export const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ESC[c]);
 
 export function highlight(title, q) {
-  const toks = tokens(q);
+  const toks = meaningfulTokens(q);
   if (!toks.length) return escapeHtml(title);
   let norm = '';
   const map = [];
@@ -123,7 +130,7 @@ export function highlight(title, q) {
   for (const t of toks) {
     let at = norm.indexOf(t);
     while (at !== -1) {
-      ranges.push([map[at], map[at + t.length - 1] + 1]);
+      if (at === 0 || norm[at - 1] === ' ') ranges.push([map[at], map[at + t.length - 1] + 1]);
       at = norm.indexOf(t, at + t.length);
     }
   }

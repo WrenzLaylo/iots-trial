@@ -1,6 +1,6 @@
 // Instant search and topic filtering for the blog landing page.
 // Server-rendered pages stay the default view; this module takes over only when someone searches or picks a topic.
-import { buildIndex, searchPosts, paginate, pageNumbers, suggest, vocabulary, highlight } from './search.js';
+import { buildIndex, searchPosts, paginate, pageNumbers, suggest, vocabulary, highlight, meaningfulTokens } from './search.js';
 
 const INDEX_URL = '/assets/data/posts-index.json';
 const SITE_SEARCH = 'https://www.insureonthespot.com/?s=';
@@ -49,8 +49,9 @@ export function initBlog() {
   function load() {
     if (data || failed) return Promise.resolve(data);
     if (!loading) {
-      loading = fetch(INDEX_URL)
-        .then((r) => { if (!r.ok) throw new Error(`index ${r.status}`); return r.json(); })
+      const ms = window.IOTS_INDEX_TIMEOUT_MS || 8000; // a hanging request falls back like a failed one
+      const timeout = new Promise((_, reject) => { window.setTimeout(() => reject(new Error('index timeout')), ms); });
+      loading = Promise.race([fetch(INDEX_URL).then((r) => { if (!r.ok) throw new Error(`index ${r.status}`); return r.json(); }), timeout])
         .then((raw) => {
           const prefixed = { ...raw, posts: raw.posts.map((p) => [p[0], raw.base + p[1], ...p.slice(2)]) };
           const items = buildIndex(prefixed);
@@ -138,7 +139,7 @@ export function initBlog() {
     const actions = el('div');
     if (q && state.topic) {
       const elsewhere = searchPosts(data.items, { q }).length;
-      if (elsewhere) actions.append(el('button', { type: 'button', class: 'suggestion', text: `Show ${plural(elsewhere, 'guide')} in all topics`, onclick: () => { state.topic = ''; state.page = 1; writeUrl(true); render(); } }));
+      if (elsewhere) actions.append(el('button', { type: 'button', class: 'suggestion', text: `Show ${plural(elsewhere, 'guide')} in all topics`, onclick: () => { state.topic = ''; state.page = 1; writeUrl(true); render({ focus: true }); } }));
     }
     const fix = q ? suggest(q, data.vocab) : null;
     if (fix && searchPosts(data.items, { q: fix }).length) {
@@ -175,17 +176,20 @@ export function initBlog() {
 
   async function render({ focus = false } = {}) {
     syncControls();
-    const filtering = state.q.trim() || state.topic;
+    const filtering = meaningfulTokens(state.q).length > 0 || state.topic;
     if (!filtering) { showDefault(); return; }
     defaultView.hidden = true;
     results.hidden = false;
     if (!data && !failed) {
       results.replaceChildren(el('div', { class: 'results-head' }, el('h2', { id: 'results-h', tabindex: '-1', text: 'Searching guides…' })), skeleton());
       await load();
-      if (!data && !failed) return;
+      return render({ focus }); // re-read state: the visitor may have cleared or changed it meanwhile
     }
     if (failed) {
-      results.replaceChildren(el('p', { class: 'notice', text: 'Live search isn’t available right now. Press Enter to search the whole website.' }));
+      const q = state.q.trim();
+      results.replaceChildren(el('p', { class: 'notice' }, 'Live search isn’t available right now. ',
+        q ? el('a', { href: SITE_SEARCH + encodeURIComponent(q), text: 'Search the whole website' })
+          : el('a', { href: SITE_SEARCH.replace('?s=', 'customer-service/blog/'), text: 'Browse the full blog' })));
       status.textContent = 'Live search unavailable. Press Enter to search the whole website.';
       chips.forEach((c) => c.classList.remove('is-on'));
       return;
@@ -196,7 +200,7 @@ export function initBlog() {
       status.textContent = state.q.trim() ? `No guides match ${state.q.trim()}.` : 'No guides found.';
     } else {
       const pg = paginate(list, state.page, PER_PAGE);
-      state.page = pg.page;
+      if (pg.page !== state.page) { state.page = pg.page; writeUrl(false); } // ?page=999 -> last page, URL corrected
       const head = el('div', { class: 'results-head' },
         el('div', {}, el('h2', { id: 'results-h', tabindex: '-1', text: headline(pg.total) }),
           el('p', { class: 'results-range', text: `Showing ${pg.from} to ${pg.to} of ${pg.total}` })),
@@ -233,7 +237,7 @@ export function initBlog() {
   });
   clearBtn.addEventListener('click', () => { state.q = ''; state.page = 1; writeUrl(false); render(); input.focus(); });
   chips.forEach((c) => c.addEventListener('click', (e) => {
-    if (failed) return; // plain link to the live category archive
+    if (failed || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // plain link: new tab, or index failed
     e.preventDefault();
     state.topic = c.dataset.topic || '';
     state.page = 1;
