@@ -67,7 +67,7 @@ Full list of 26 findings with evidence, severity and status: `docs/FINDINGS.md`.
 - Status pill is computed in the browser at view time in America/Chicago time and refreshed every minute. The HTML itself shows the hours, so the page works without JavaScript. Only published days are listed (Sunday option B): on a day with no hours the pill says when it next opens. Holidays are unknown to the site, so each card carries "Holiday hours may vary, call to confirm." (see decisions log).
 - Map: Leaflet + OpenStreetMap tiles with the required attribution, 4 pins, loaded only when scrolled near (IntersectionObserver). If it fails or JS is off, a "View on Google Maps" link shows instead.
 - Referral callout ($100 Amazon gift card) and BBB badge kept. Quote box after the list.
-- Title "Locations: Chicago, Berwyn & Melrose Park | Insure On The Spot", meta description, JSON-LD InsuranceAgency per branch (address, geo, telephone, openingHoursSpecification, url, parentOrganization) + BreadcrumbList.
+- Title "Chicago, Berwyn & Melrose Park Offices | Insure On The Spot" (59 characters), meta description, JSON-LD InsuranceAgency per branch (address, geo, telephone, openingHoursSpecification, url, parentOrganization) + BreadcrumbList.
 
 ## Page: Contact (`/contact/`)
 - Hero photo without baked-in text: their staff photo with the toy car (`JP2_1071_web.jpg`, already used on this page). "Chicago's #1 Auto Insurance Agency" becomes real HTML text.
