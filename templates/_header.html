@@ -1,9 +1,9 @@
-<div class="topbar">
+<nav class="topbar" aria-label="Quick links">
   <div class="wrap">
     <p class="topbar-left"><a class="topbar-call" href="tel:{{ main_tel }}">{{ icons.phone | safe }}Call now {{ main_phone }}</a><span aria-hidden="true">|</span><a href="{{ links.espanol }}" lang="es" hreflang="es">Español</a></p>
     <ul>{% for l in nav_top %}<li><a href="{{ l.href }}"{% if l.href == page.path %} aria-current="page"{% endif %}>{{ l.label }}</a></li>{% endfor %}</ul>
   </div>
-</div>
+</nav>
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="/"><img src="/assets/img/logo.png" alt="Insure On The Spot, preview home" width="{{ images['logo.png'][0] }}" height="{{ images['logo.png'][1] }}"></a>
