@@ -63,7 +63,7 @@ Rebuild three pages of insureonthespot.com (blog landing, locations, contact) as
 - Title band: breadcrumb, H1 "Our Locations", intro (their copy), "4 offices / Free parking at each" (all four branch pages say free parking), their existing photo.
 - Desktop: branch list left, map right (sticky). Mobile: list first, map below.
 - Branch card: name, note (HQ and Melrose Park: "Next to the DMV"), live status pill, address, hours (today in bold), primary Call button (`tel:`), Directions link (`https://www.google.com/maps/dir/?api=1&destination=<address>`, opens the maps app on phones), Branch details link (live page).
-- Status pill is computed in the browser at view time in America/Chicago time and refreshed every minute. The HTML itself shows the hours, so the page works without JavaScript. Only published days are listed (Sunday option B): on a day with no hours the pill says when it next opens. Holidays are unknown to the site, so the pill can be wrong on a holiday (accepted, see decisions log).
+- Status pill is computed in the browser at view time in America/Chicago time and refreshed every minute. The HTML itself shows the hours, so the page works without JavaScript. Only published days are listed (Sunday option B): on a day with no hours the pill says when it next opens. Holidays are unknown to the site, so each card carries "Holiday hours may vary, call to confirm." (see decisions log).
 - Map: Leaflet + OpenStreetMap tiles with the required attribution, 4 pins, loaded only when scrolled near (IntersectionObserver). If it fails or JS is off, a "View on Google Maps" link shows instead.
 - Referral callout ($100 Amazon gift card) and BBB badge kept. Quote box after the list.
 - Title "Locations: Chicago, Berwyn & Melrose Park | Insure On The Spot", meta description, JSON-LD InsuranceAgency per branch (address, geo, telephone, openingHoursSpecification, url, parentOrganization) + BreadcrumbList.
@@ -96,7 +96,7 @@ Rebuild three pages of insureonthespot.com (blog landing, locations, contact) as
 The Spanish page, branch detail pages, the quote flow itself, WordPress theme work, dark mode, a contact form, analytics tags.
 
 ## Decisions log
-- Holiday hours: no extra line (Wrenz, 2026-10-07). We only show what their site publishes. Known limitation, mentioned on the developer call if asked: the status pill does not know about holidays.
+- Holiday hours: ADD a small line "Holiday hours may vary, call to confirm." under the hours on every branch card and under the Customer Service / Sales hours on Contact (Wrenz, 2026-10-07, reversed an earlier "no"). The status pill still does not know holiday dates; the line covers that gap.
 
 ## Risks
 - Vercel's GitHub integration may not have access to a new private repo: deploy with the `vercel` CLI instead.
