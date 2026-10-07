@@ -71,13 +71,15 @@ def test_status_uses_chicago_time(pw, base):
     browser.close()
 
 
-def test_no_js_page_still_works(pw, base):
+@pytest.mark.parametrize("path", PAGES)
+def test_no_js_page_still_works(pw, base, path):
     browser = pw.chromium.launch()
     ctx = browser.new_context(java_script_enabled=False, viewport={"width": 390, "height": 900})
     page = ctx.new_page()
-    page.goto(base + "/locations/")
-    assert page.locator(".hours").first.is_visible()
-    assert page.locator('a[href="tel:+17732020651"]').count() == 1
+    page.goto(base + path)
+    if path != "/customer-service/blog/":
+        assert page.locator(".hours").first.is_visible()
+        assert page.locator('a[href="tel:+17732020651"]').count() == 1
     assert page.locator("#site-menu a").first.is_visible()  # menu shown without JS
     form = page.locator("form[data-quote]").first
     assert form.get_attribute("action") == "https://quote.insureonthespot.com/" and form.get_attribute("method") == "get"
@@ -193,4 +195,31 @@ def test_keyboard_walk(pw, base, path):
             break
     assert reached_footer, f"{path}: focus never reached the footer (trap?)"
     assert not no_ring, f"{path}: no visible focus ring on {no_ring[:5]}"
+    browser.close()
+
+
+@pytest.mark.parametrize("blocked", ["**/assets/js/site.js*", "**/assets/js/hours.js*"])
+def test_menu_usable_when_script_fails(pw, base, blocked):
+    browser = pw.chromium.launch()
+    page = browser.new_page(viewport={"width": 390, "height": 900})
+    page.route(blocked, lambda r: r.abort())
+    page.goto(base + "/contact/", wait_until="load")
+    page.wait_for_timeout(500)
+    menu_link = page.locator("#site-menu a").first
+    if not menu_link.is_visible():
+        page.locator("[data-menu-toggle]").click()
+    assert menu_link.is_visible(), f"menu unreachable when {blocked} fails"
+    browser.close()
+
+
+def test_map_does_not_trap_scrolling_on_phones(pw, base):
+    browser = pw.chromium.launch()
+    ctx = browser.new_context(viewport={"width": 393, "height": 852}, is_mobile=True, has_touch=True,
+                              user_agent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1")
+    page = ctx.new_page()
+    page.goto(base + "/locations/", wait_until="load")
+    page.locator(".map-panel").scroll_into_view_if_needed()
+    page.wait_for_selector(".leaflet-marker-icon", timeout=15000)
+    classes = page.locator(".map-canvas").get_attribute("class")
+    assert "leaflet-touch-drag" not in classes, classes
     browser.close()

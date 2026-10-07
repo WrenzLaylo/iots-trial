@@ -1,7 +1,7 @@
 Preview: https://iots-trial.vercel.app (noindexed on purpose; robots.txt stays open so Google can see the noindex)
 
 What I tested
-- Chrome, Firefox and Safari's engine at 320, 390, 768 and 1440px: no sideways scrolling, no script errors. Also on my own phone.
+- Chrome, Firefox and Safari's engine at 320, 390, 768 and 1440px: no sideways scrolling, no script errors.
 - Accessibility: axe scan with zero issues, keyboard-only navigation with a visible focus ring everywhere.
 - All 88 links and every phone number, the ZIP quote box (valid and invalid ZIPs), the pages with JavaScript off, the open/closed labels from another time zone, and the structured data (schema.org validator, 0 errors).
 - Lighthouse mobile: performance 99-100 vs 26-27 on the live pages, accessibility 100 vs 87-95. Part of that gap is that the preview has none of your marketing tags.

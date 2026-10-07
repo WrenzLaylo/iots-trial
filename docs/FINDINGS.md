@@ -132,6 +132,7 @@ Severity: **H** hurts calls/quotes or search visibility now, **M** noticeable qu
 ### 19. Español (H, Improved / Recommend)
 - **Evidence:** the "Español" link on every page goes to the single page /espanol/. That page has no link back to English (its top bar still says "Español"), declares `<html lang="en-US">` on Spanish content, and no page has hreflang tags.
 - **Impact:** Spanish speakers lose the page they were on and get stuck; screen readers use English pronunciation; search engines get no language pairing.
+- **Also:** Spanish-language posts are mixed into the English blog with no language marking (e.g. "Seguro de Auto con Pago Inicial Bajo en Chicago..."). The preview marks those cards `lang="es"`.
 - **Preview:** the link is kept and marked `lang="es"` and `hreflang="es"`. No `<link rel="alternate" hreflang>`, because these 3 pages have no Spanish equivalents.
 - **Recommend:** a language switcher on both versions, `lang="es"` on Spanish pages, hreflang pairs wherever a translation exists.
 

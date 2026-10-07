@@ -20,6 +20,7 @@ DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 DAY_ABBR = {"mon": "Mon", "tue": "Tue", "wed": "Wed", "thu": "Thu", "fri": "Fri", "sat": "Sat", "sun": "Sun"}
 PER_PAGE, BLOG_PAGES = 12, 3
 HIDDEN_CATEGORIES = {"uncategorized"}
+SPANISH_POST_IDS = {12719, 12699}  # Spanish-language posts mixed into the English blog (checked by hand)
 
 
 def fmt_time(hhmm: str) -> str:
@@ -123,7 +124,7 @@ def _post_view(p, cats):
     topic = next((cats[c]["name"] for c in p["categories"] if c in cats and cats[c]["slug"] not in HIDDEN_CATEGORIES), "")
     return {"title": _html.unescape(p["title"]), "link": p["link"], "date": p["date"],
             "date_label": f"{d:%B} {d.day}, {d.year}", "topic": _html.unescape(topic),
-            "excerpt": clean_excerpt(p["excerpt_html"])}
+            "excerpt": clean_excerpt(p["excerpt_html"]), "lang": "es" if p["id"] in SPANISH_POST_IDS else None}
 
 
 def blog_pages(ctx):

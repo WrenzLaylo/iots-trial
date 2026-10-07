@@ -28,7 +28,7 @@
 {% endmacro %}
 
 {% macro post_card(post, featured=False) %}
-<article class="card post{% if featured %} post-featured{% endif %}">
+<article class="card post{% if featured %} post-featured{% endif %}"{% if post.lang %} lang="{{ post.lang }}"{% endif %}>
   <p class="meta">{% if post.topic %}<span class="topic">{{ post.topic }}</span>{% endif %}<time datetime="{{ post.date }}">{{ post.date_label }}</time></p>
   <h2 class="post-title"><a href="{{ post.link }}">{{ post.title }}</a></h2>
   <p>{{ post.excerpt }}</p>

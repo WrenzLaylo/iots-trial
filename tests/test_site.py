@@ -159,3 +159,29 @@ def test_contact_task_links(site):
                 "https://www.insureonthespot.com/see-what-our-customers-are-saying-about-us/",
                 "https://www.insureonthespot.com/employment-opportunities/"]:
         assert url in hrefs, url
+
+
+def _nodes(block):
+    yield block
+    for v in block.values():
+        if isinstance(v, dict):
+            yield from _nodes(v)
+
+
+@pytest.mark.parametrize("rel", ["/locations/", "/contact/"])
+def test_jsonld_local_business_nodes_have_address(site, rel):
+    p = parse(site, rel)
+    for block in p.jsonld:
+        for node in _nodes(block):
+            if node.get("@type") == "InsuranceAgency":
+                assert "address" in node, f"{rel}: InsuranceAgency without address: {node.get('@id')}"
+            if node.get("@id", "").endswith("/#organization"):
+                assert node.get("@type") in (None, "Organization"), node
+
+
+@pytest.mark.parametrize("rel,title", [("/customer-service/blog/page/2/", "Seguro de Auto con Pago Inicial Bajo"),
+                                       ("/customer-service/blog/page/3/", "Te Detienen Sin Seguro")])
+def test_spanish_posts_are_marked_spanish(site, rel, title):
+    html = (site / rel.strip("/") / "index.html").read_text(encoding="utf-8")
+    card = re.search(r'<article class="card post[^>]*>(?:(?!</article>).)*' + re.escape(title), html, flags=re.S)
+    assert card and 'lang="es"' in card.group(0)[:200], f"{title} card is not lang=es"
