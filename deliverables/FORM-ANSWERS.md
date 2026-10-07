@@ -5,7 +5,7 @@ Option A (recommended): record a short Loom with your voice, using the script at
 Option B: upload `deliverables/walkthrough-v3.mp4` (1:25, captioned, no voice) to Loom ("Upload a video") or to Google Drive (share: anyone with the link), and paste that link.
 
 ## Repository or files
-Pending your choice (see chat): make https://github.com/WrenzLaylo/iots-trial public, or leave it private and rely on the uploaded zip.
+https://github.com/WrenzLaylo/iots-trial (public; the open pull requests show the build page by page, v3 is PR #9)
 
 ## Live demo
 https://iots-trial.vercel.app (v3: editorial blog with instant search, clean Locations and Contact)
